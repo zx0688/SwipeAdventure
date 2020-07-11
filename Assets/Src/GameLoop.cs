@@ -113,6 +113,7 @@ public class GameLoop : MonoBehaviour {
 
                 state = GameLoopState.DIABLED;
                 EndTurnCanvas?.SetActive (true);
+                
 
                 Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin", Services.data.isWin (timestamp) } });
                 Analytics.FlushEvents ();
