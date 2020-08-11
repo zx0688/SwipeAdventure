@@ -4,19 +4,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using Cysharp.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Managers {
+
     public class GameDataManager : MonoBehaviour {
+
+        public static readonly int CARD_ID = 0;
+        public static readonly int RESOURCE_ID = 1;
+        public static readonly int ACTION_ID = 3;
 
         public static GameDataManager instance = null;
         public static readonly string EFFECT = "effect";
 
 #if UNITY_STANDALONE_WIN
-        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
+        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y";
 #else
-        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
+        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
 #endif
         private static readonly string URL_META = "";
         private static readonly string URL_VERSION = "";
@@ -35,6 +41,43 @@ namespace Managers {
 
         }
 
+        public void GetResourceReward (List<RewardData> result, List<RewardData> reward, List<RewardData> cost, int time) {
+
+            foreach (RewardData r in reward) {
+                if (!Services.data.CheckConditions (r.conditions, time))
+                    continue;
+                if (r.category == RESOURCE_ID) {
+                    RewardData _r = GetRewardItem (result, r);
+                    _r.count += r.count;
+                } else if (r.category == ACTION_ID) {
+                    ActionData a = ActionInfo (r.id);
+                    for (int i = 0; i < r.count; i++)
+                        GetResourceReward (result, a.reward, a.cost, time);
+                }
+            }
+            foreach (RewardData r in cost) {
+                if (!Services.data.CheckConditions (r.conditions, time))
+                    continue;
+                if (r.category == RESOURCE_ID) {
+                    RewardData _r = GetRewardItem (result, r);
+                    _r.count -= r.count;
+                }
+            }
+        }
+
+        private RewardData GetRewardItem (List<RewardData> list, RewardData item) {
+            RewardData r = list.Find (i => i.id == item.id && i.enemy == item.enemy && i.category == item.category);
+            if (r == null) {
+                r = new RewardData ();
+                r.count = 0;
+                r.id = item.id;
+                r.enemy = item.enemy;
+                r.category = item.category;
+                list.Add (r);
+            }
+            return r;
+        }
+
         public ResourceData ResInfo (int id) {
             ResourceData r = game.resources.Find (_r => _r.id == id);
             return r;
@@ -49,18 +92,18 @@ namespace Managers {
             return r.maxValue == 0 ? 99999999 : r.maxValue;
         }
 
-        public QueueItem GetNewCard (CardData card, bool me, int time) {
+        public CardItem GetNewCard (CardData card, bool me, int time) {
             int ID = (int) UnityEngine.Random.Range (0, game.cards.Count - 1);
 
-            QueueItem q = new QueueItem ();
+            CardItem q = new CardItem ();
             q.me = me;
-            q.card = game.cards[ID];
+            q.data = game.cards[ID];
 
             return q;
         }
 
-        private QueueItem CardSelection (List<QueueItem> queue) {
-            queue.Sort ((p1, p2) => p1.card.priority.CompareTo (p2.card.priority));
+        private CardItem CardSelection (List<CardItem> queue) {
+            queue.Sort ((p1, p2) => p1.data.priority.CompareTo (p2.data.priority));
             return queue.Count == 0 ? null : queue[0];
         }
 
@@ -68,14 +111,16 @@ namespace Managers {
             return true;
         }
 
-        public bool CheckAvailableCost (List<RewardData> rewards) {
-            foreach (RewardData r in rewards) {
-                PlayerManager player = r.enemy == true ? Services.enemy : Services.player;
-                int available = player.AvailableResource (r.id);
-                if (r.count > available)
-                    return false;
+        public List<ConditionData> GetUnavailableConditions (List<ConditionData> conditions, int time) {
+
+            List<ConditionData> result = new List<ConditionData> ();
+            foreach (ConditionData c in conditions) {
+                List<ConditionData> checkList = new List<ConditionData> ();
+                checkList.Add (c);
+                if (!CheckConditions (checkList, time))
+                    result.Add (c);
             }
-            return true;
+            return result;
         }
 
         public bool CheckConditions (List<ConditionData> conditions, int time) {
@@ -186,12 +231,12 @@ namespace Managers {
         public async UniTask Init (IProgress<float> progress = null) {
             int mversion = SecurePlayerPrefs.GetInt ("meta_version");
 
-            var asset = await Services.assets.GetJson("meta", false, GOOGLE_DRIVE, false, progress);
-            
+            var asset = await Services.assets.GetJson ("meta", false, GOOGLE_DRIVE, false, progress);
+
             Debug.Log (asset);
-            
+
             game = JsonUtility.FromJson<GameData> (asset);
-         
+
             version = game.timestamp;
             if (mversion != version) {
                 SecurePlayerPrefs.SetInt ("meta_version", version);
@@ -204,4 +249,5 @@ namespace Managers {
 
         }
     }
+
 }

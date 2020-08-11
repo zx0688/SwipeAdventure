@@ -48,7 +48,7 @@ namespace Controllers {
                 }
             }
 
-            Debug.Log (data.count);
+            
 
             for (int i = 0; i < icons.Length; i++) {
 

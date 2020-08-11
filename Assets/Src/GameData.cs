@@ -69,15 +69,15 @@ public class CardData {
     public string header;
     public string description;
 
-    public ChoiseData left;
-    public ChoiseData right;
-    public ChoiseData eRight;
-    public ChoiseData eLeft;
+    public ChoiceData left;
+    public ChoiceData right;
+    public ChoiceData eRight;
+    public ChoiceData eLeft;
 
 }
 
 [Serializable]
-public class ChoiseData {
+public class ChoiceData {
     //0 - card, 1 - res, 2 - tag
     public int id;
     public int category;

@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Managers {
+
     public class PlayerManager : MonoBehaviour {
 
         private static readonly string URL = "";
@@ -54,7 +55,7 @@ namespace Managers {
                 if (r.count == 0)
                     continue;
                 ResourceData d = Services.data.ResInfo (r.id);
-                if (d.tags != null && d.tags.Equals(GameDataManager.EFFECT))
+                if (d.tags != null && d.tags.Equals (GameDataManager.EFFECT))
                     result.Add (r);
             }
             return result;
@@ -108,22 +109,31 @@ namespace Managers {
             OnResourceUpdated?.Invoke (res.id, count);
         }
 
-        public void Execute (CardData cardData, int choise, bool me, int time, PlayerManager enemy) {
+        public void Execute (CardData cardData, int choice, bool me, int time, PlayerManager enemy) {
 
-            ChoiseData chMeta = null;
+            ChoiceData chMeta = null;
             if (me == true) {
-                chMeta = choise == Swipe.LEFT ? cardData.left : cardData.right;
+                chMeta = choice == Swipe.LEFT_CHOICE ? cardData.left : cardData.right;
             } else {
-                chMeta = choise == Swipe.LEFT ? cardData.eLeft : cardData.eRight;
-            }
-
-            if (chMeta.reward == null) {
-                Debug.Log (JsonUtility.ToJson (chMeta));
-                Debug.LogError (chMeta);
+                chMeta = choice == Swipe.LEFT_CHOICE ? cardData.eLeft : cardData.eRight;
             }
 
             if (Services.data.CheckConditions (chMeta.conditions, time)) {
-                AcceptCostReward (chMeta.cost, chMeta.reward, time, enemy);
+                List<RewardData> result = new List<RewardData> ();
+                Services.data.GetResourceReward (result, chMeta.reward, chMeta.cost, time);
+                foreach (RewardData r in result) {
+                    if (r.count > 0) {
+                        if (r.enemy)
+                            enemy.AddResource (r.id, r.count);
+                        else
+                            AddResource (r.id, r.count);
+                    } else {
+                        if (r.enemy)
+                            enemy.SubResource (r.id, Math.Abs(r.count));
+                        else
+                            SubResource (r.id, Math.Abs(r.count));
+                    }
+                }
             }
 
             CardExecutedItem cardVO = playerData.cards.Find (c => c.id == cardData.id);
@@ -133,7 +143,7 @@ namespace Managers {
             }
 
             cardVO.id = cardData.id;
-            cardVO.choice = choise;
+            cardVO.choice = choice;
             cardVO.executed = time;
             SaveCardLocal (cardVO);
 
@@ -195,24 +205,6 @@ namespace Managers {
 
             return;
 
-            /*playerData = new PlayerData ();
-            //recover resources
-            foreach (ResourceData r in Services.meta.gameMeta.resources) {
-                if (SecurePlayerPrefs.HasKey ("r" + r.id)) {
-                    ResourceItem rvo = new ResourceItem ();
-                    rvo.id = r.id;
-                    rvo.count = SecurePlayerPrefs.GetInt ("r" + r.id);
-                    playerData.resources.Add (rvo);
-                }
-            }
-            //recover cards
-            foreach (CardData c in Services.meta.gameMeta.cards) {
-                if (SecurePlayerPrefs.HasKey ("c" + c.id)) {
-                    CardData cvo = JsonUtility.FromJson<CardData> (SecurePlayerPrefs.GetString ("c" + c.id));
-                    playerData.cards.Add (cvo);
-                }
-            }
-            playerData.timestamp = SecurePlayerPrefs.GetInt ("profile");*/
         }
 
     }

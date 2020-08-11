@@ -14,23 +14,22 @@ public enum GameLoopState {
     IDLE,
     DIABLED
 }
-public class QueueItem {
-    public CardData card;
+public class CardItem {
+    public CardData data;
     public bool me;
 }
 public class GameLoop : MonoBehaviour {
 
-    // managers----
-    // views-----s
-
-    // [SerializeField]
-    //public GameObject[] cardDependents;
 
     [SerializeField]
     public GameObject[] cardSwipe;
 
     public event Action OnQueueTrigger;
     public event Action OnNewItem;
+
+    [HideInInspector]
+    public event Action<GameObject> OnNewCard;
+
 
     private int currentViewIndex;
 
@@ -39,7 +38,7 @@ public class GameLoop : MonoBehaviour {
 
     private GameLoopState state;
 
-    private QueueItem currentItem;
+    public CardItem cardItem;
     private CardIconQueue cardIconQueue;
 
     private GameObject EndTurnCanvas;
@@ -63,11 +62,14 @@ public class GameLoop : MonoBehaviour {
 
         //queue = new List<QueueItem> ();
         state = GameLoopState.IDLE;
-
         EndTurnCanvas = GameObject.Find ("EndGameCanvas");
         EndTurnCanvas?.SetActive (false);
 
         Loop ().Forget ();
+    }
+
+    public GameObject GetGameObjectCard () {
+        return cardSwipe[currentViewIndex];
     }
 
     public async UniTask SwipeCard () {
@@ -86,12 +88,12 @@ public class GameLoop : MonoBehaviour {
 
             await UniTask.WaitUntil (() => state == GameLoopState.IDLE);
 
-            int currentChoise = Swipe.ANY;
+            int currentChoise = -1;
 
-            currentItem = cardIconQueue.GetFirstItem ();
+            cardItem = cardIconQueue.GetFirstItem ();
 
-            var t1 = SwipeCard ();
-            var t2 = cardIconQueue.Shift ();
+            var t1 = cardIconQueue.Shift ();
+            var t2 = SwipeCard ();
             await UniTask.WhenAll (t1, t2);
 
             Swipe swipe = cardSwipe[currentViewIndex].GetComponent<Swipe> ();
@@ -100,7 +102,7 @@ public class GameLoop : MonoBehaviour {
             int timestamp = GameTime.GetTime ();
 
             lock (this) {
-                Services.player.Execute (currentItem.card, currentChoise, currentItem.me, timestamp, Services.enemy);
+                Services.player.Execute (cardItem.data, currentChoise, cardItem.me, timestamp, Services.enemy);
                 //Services.enemy.Execute (currentItem.card, swipe.currentChoise, true, timestamp, Services.player);
                 // Services.player.Execute (currentItem.card, choiseP, timestamp, Services.enemy);
                 // Services.enemy.Execute (currentItem.card, choiseE, timestamp, Services.player);
@@ -113,7 +115,6 @@ public class GameLoop : MonoBehaviour {
 
                 state = GameLoopState.DIABLED;
                 EndTurnCanvas?.SetActive (true);
-                
 
                 Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin", Services.data.isWin (timestamp) } });
                 Analytics.FlushEvents ();
@@ -152,6 +153,8 @@ public class GameLoop : MonoBehaviour {
 
     private void OpenNewCard () {
 
+        cardSwipe[currentViewIndex].SetActive (false);
+
         currentViewIndex++;
         if (currentViewIndex >= cardSwipe.Length) {
             currentViewIndex = 0;
@@ -163,18 +166,19 @@ public class GameLoop : MonoBehaviour {
         // currentItem.card.anim = currentItem.card.anim != null ? currentItem.card.anim : "FadeIn_1";
 
         int time = GameTime.GetTime ();
-        SwipeParams swipeParams;
-        swipeParams.leftAvailable =
-            Services.data.CheckConditions (currentItem.card.left.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.left.cost);
-        swipeParams.rightAvailable =
-            Services.data.CheckConditions (currentItem.card.right.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.right.cost);
+        // SwipeParams swipeParams;
+        //swipeParams.leftAvailable = false;
+        // Services.data.CheckConditions (currentItem.card.left.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.left.cost);
+        // swipeParams.rightAvailable = false;
+        // Services.data.CheckConditions (currentItem.card.right.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.right.cost);
 
         //cardViews[currentViewIndex].GetComponent<Animation> ().Stop();
-        cardSwipe[currentViewIndex].GetComponent<Swipe> ().ConstructNewSwipe (swipeParams);
-        cardSwipe[currentViewIndex].GetComponent<CardController> ().UpdateData (currentItem);
 
-        cardSwipe[currentViewIndex].GetComponent<Swipe> ().StartSwipe ();
+        cardSwipe[currentViewIndex].GetComponent<CardController> ().UpdateData (cardItem);
 
+        OnNewCard?.Invoke (cardSwipe[currentViewIndex]);
+
+        cardSwipe[currentViewIndex].GetComponent<CardController> ().FadeIn ().Forget ();
         /*  var cd = FindObjectsOfType<MonoBehaviour> ().OfType<ICardUpdate<GameObject>> ();
          foreach (ICardUpdate<GameObject> c in cd) {
              c.CardUpdate (cardViews[currentViewIndex]);

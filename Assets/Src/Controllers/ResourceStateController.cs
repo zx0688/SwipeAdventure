@@ -10,10 +10,10 @@ using UnityEngine.UI;
 namespace Controllers {
     public class ResourceStateController : MonoBehaviour {
         [SerializeField]
-        protected int resourceId;
+        public int resourceId;
 
         [SerializeField]
-        private bool enemy;
+        public bool enemy;
 
        // [SerializeField]
         //private Sprite customSprite;

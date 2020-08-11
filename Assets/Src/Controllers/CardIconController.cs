@@ -1,19 +1,30 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Controllers {
-    public class CardIconController : MonoBehaviour, IUpdateData<QueueItem> {
+    public class CardIconController : MonoBehaviour, IUpdateData<CardItem> {
 
-        public QueueItem data;
+        public CardItem data;
 
         public Sprite sme;
         public Sprite senemy;
 
-        public void UpdateData (QueueItem data) {
+        private Animator animator;
+
+        public async UniTask FadeOut () {
+
+            animator.SetTrigger ("fadeout");
+            while (animator.GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
+                await UniTask.Yield ();
+            }
+        }
+
+        public void UpdateData (CardItem data) {
             this.data = data;
 
             UpdateHUD ();
@@ -34,7 +45,7 @@ namespace Controllers {
                         Image icon = g.GetComponent<Image> ();
 
                         string iconType = data.me == true ? "me" : "enemy";
-                        icon.sprite = await Services.assets.GetSprite ("Cards/" + data.card.id + "/icon/icon", true);
+                        icon.sprite = await Services.assets.GetSprite ("Cards/" + data.data.id + "/icon/icon", true);
 
                         // Color col;
                         //ColorUtility.TryParseHtmlString(data.me ? "#00E11E" : "#E10007", out col);
@@ -48,6 +59,7 @@ namespace Controllers {
         }
 
         void Start () {
+            animator = transform.Find ("Container").gameObject.GetComponent<Animator> ();
 
         }
 

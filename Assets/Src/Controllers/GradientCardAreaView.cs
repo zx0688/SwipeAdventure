@@ -23,7 +23,7 @@ public class GradientCardAreaView : MonoBehaviour{
     // Update is called once per frame
     void Update () {
         var tempColor = image.color;
-        if (swipe != null && (swipe.state == SwipeState.DRAG || swipe.state == SwipeState.RETURN)) {
+        /*if (swipe != null && (swipe.state == SwipeState.DRAG || swipe.state == SwipeState.RETURN)) {
             if (swipe.swipeParams.leftAvailable && swipe.swipeParams.rightAvailable) {
                 Mathf.MoveTowards(tempColor.a, 0f, speed_fadeout);
             } else {
@@ -33,7 +33,7 @@ public class GradientCardAreaView : MonoBehaviour{
             }
         } else {
             tempColor.a = Mathf.MoveTowards(tempColor.a, 0f, speed_fadeout);
-        }
+        }*/
         image.color = tempColor;
     }
 

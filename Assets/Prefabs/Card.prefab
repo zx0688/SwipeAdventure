@@ -84,11 +84,11 @@ GameObject:
   m_Component:
   - component: {fileID: 5302364868964910476}
   - component: {fileID: 5302364868964910467}
-  - component: {fileID: 5302364868964910465}
   - component: {fileID: 5302364868964910478}
   - component: {fileID: 5302364868964910477}
   - component: {fileID: 5302364868964910466}
-  - component: {fileID: 8149309253315969895}
+  - component: {fileID: 38794976445774076}
+  - component: {fileID: 4028326191983075967}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -114,7 +114,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 11.4}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 840, y: 840}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5302364868964910467
@@ -125,27 +125,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5302364868964910471}
   m_CullTransparentMesh: 0
---- !u!114 &5302364868964910465
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5302364868964910471}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bdd793510ce967d418ca5d2c2732710b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _parent: {fileID: 0}
-  fMovingSpeed: 35
-  swipeDetectionLimit_LR: 595
-  fRotation: -0.005
-  fScale: 1
-  pivotPoint: {x: 0, y: 0}
-  currentChoise: 0
-  deviation: 0
-  vector: {x: 0, y: 0}
 --- !u!114 &5302364868964910478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,10 +137,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a0826a868ffd7041840564fc44b4094, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionText: {fileID: 0}
-  actionPanel: {fileID: 0}
-  effectPanel: {fileID: 0}
-  resPanel: {fileID: 0}
+  actionPanelContainer: {fileID: 0}
+  actionPanelItems: {fileID: 0}
   data:
     id: 0
     category: 0
@@ -202,7 +179,17 @@ MonoBehaviour:
       reward: []
       conditions: []
       sound: []
-    block:
+    eRight:
+      id: 0
+      category: 0
+      tags: []
+      anim: 
+      text: 
+      cost: []
+      reward: []
+      conditions: []
+      sound: []
+    eLeft:
       id: 0
       category: 0
       tags: []
@@ -213,6 +200,8 @@ MonoBehaviour:
       conditions: []
       sound: []
   me: 0
+  sme: {fileID: 0}
+  senemy: {fileID: 0}
 --- !u!225 &5302364868964910477
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -254,7 +243,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!95 &8149309253315969895
+--- !u!95 &38794976445774076
 Animator:
   serializedVersion: 3
   m_ObjectHideFlags: 0
@@ -262,7 +251,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5302364868964910471}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 84fc737fd135adb4eb576f6164acaa3c, type: 2}
   m_CullingMode: 0
@@ -273,6 +262,28 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &4028326191983075967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5302364868964910471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd793510ce967d418ca5d2c2732710b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _parent: {fileID: 0}
+  fMovingSpeed: 32
+  swipeDetectionLimit_LR: 516
+  fRotation: 0
+  fScale: 1
+  pivotPoint: {x: 0, y: 0}
+  currentChoise: 0
+  deviation: 0
+  vector: {x: 0, y: 0}
+  gameScripts: {fileID: 0}
 --- !u!1001 &5302364868023086824
 PrefabInstance:
   m_ObjectHideFlags: 0
