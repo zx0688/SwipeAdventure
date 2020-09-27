@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: New Sprite Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 1
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: Android
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 47
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 2
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 0ea7191ebab555b4384f8ee9210b7a88, type: 3}
+    totalSpriteSurfaceArea: 1081200
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 731fb3909fc39c44bbb737019c77bc75, type: 3}
+  - {fileID: 21300000, guid: 1b7a67314c7382a46865c2c5b5ae5163, type: 3}
+  - {fileID: 21300000, guid: eb9e0c418a4f7354383d88f2c0754937, type: 3}
+  - {fileID: 21300000, guid: 492ad281bc6e9014594486a1baa605eb, type: 3}
+  - {fileID: 21300000, guid: 9ed9090241cd68f44953650d1d443b6d, type: 3}
+  - {fileID: 21300000, guid: ee3006220660f7c4286903a8842a6e48, type: 3}
+  - {fileID: 21300000, guid: 6ac9b7525cec527468780f147ca50264, type: 3}
+  - {fileID: 21300000, guid: 0e84d962d984d7641b343ffe033951b6, type: 3}
+  - {fileID: 21300000, guid: f56341c4f54a7a84fba3afd8f7ba50a0, type: 3}
+  - {fileID: 21300000, guid: 4035eef57ecfae64c9c617af4957666e, type: 3}
+  - {fileID: 21300000, guid: accf6307e5cbe084fb7194673917dda7, type: 3}
+  - {fileID: 21300000, guid: c0df1528494812e4da3cf5e232dac52f, type: 3}
+  - {fileID: 21300000, guid: 68bd27c8f7dee4d42b44c4e812708161, type: 3}
+  - {fileID: 21300000, guid: d48bfc5ac6ff09a4199cae7bbaa4bebc, type: 3}
+  - {fileID: 21300000, guid: 2c90abfa0f7c79c4986c3016da3baba2, type: 3}
+  - {fileID: 21300000, guid: 0eaf2d0bbabc8ee4b8a6fdd3c635b837, type: 3}
+  - {fileID: 21300000, guid: cd90066b80298454aac32f0f6f1eb660, type: 3}
+  - {fileID: 21300000, guid: 93780b7b77cbf0246b08af0ca3b5c627, type: 3}
+  - {fileID: 21300000, guid: fda574bb85fba044181468b703d5b1ca, type: 3}
+  - {fileID: 21300000, guid: 568aacbbba7e1f9418eb092e870111c5, type: 3}
+  - {fileID: 21300000, guid: 5712b62c473462b4187a9d754ef6f123, type: 3}
+  - {fileID: 21300000, guid: 150883cc55639a949853ddeef56c912d, type: 3}
+  - {fileID: 21300000, guid: 61f5c5ec85a3c854ca4cb235785469af, type: 3}
+  - {fileID: 21300000, guid: 445b59ec21cb99a488624aece1bf7796, type: 3}
+  - {fileID: 21300000, guid: 4ed558ae4009f1b4788120cff2005e3f, type: 3}
+  - {fileID: 21300000, guid: f69d273fa39c9cc458089b09e79530a9, type: 3}
+  - {fileID: 21300000, guid: 477df5dfc08b570478745a3b5c9560c0, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Orc_emotion5
+  - Goblin_damage2
+  - Orc_emotion3
+  - Demon_emotion5
+  - Goblin_emotion1
+  - Orc_emotion4
+  - Demon_Head
+  - Goblin_emotion2
+  - Demon_emotion4
+  - Goblin_emotion5
+  - Orc_damage0
+  - Goblin_damage0
+  - Goblin_damage1
+  - Goblin_emotion4
+  - Orc_damage2
+  - Orc_emotion1
+  - Demon_emotion3
+  - Goblin_Head
+  - Goblin_emotion3
+  - Demon_damage2
+  - Orc_emotion2
+  - Demon_damage1
+  - Orc_damage1
+  - Orc_Head
+  - Demon_damage0
+  - Demon_emotion2
+  - Demon_emotion1
+  m_Tag: New Sprite Atlas
+  m_IsVariant: 0

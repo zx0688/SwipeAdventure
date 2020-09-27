@@ -176,8 +176,19 @@ namespace Controllers {
             if (Swipe.state != SwipeState.DRAG)
                 return;
 
+
+            List<ConditionData> _conditions = null;
+            if(me == true)
+            {
+                _conditions = direction == SwipeDirection.RIGHT ? this.data.right.conditions : this.data.left.conditions;
+            }
+            else
+            {
+                _conditions = direction == SwipeDirection.RIGHT ? this.data.eRight.conditions : this.data.eLeft.conditions;
+            }
+
             int time = GameTime.GetTime ();
-            List<ConditionData> conditions = Services.data.GetUnavailableConditions (direction == SwipeDirection.RIGHT ? this.data.right.conditions : this.data.left.conditions, time);
+            List<ConditionData> conditions = Services.data.GetUnavailableConditions (_conditions, time);
 
             if (conditions.Count == 0)
                 return;

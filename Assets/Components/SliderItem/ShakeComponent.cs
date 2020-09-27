@@ -7,7 +7,7 @@ public class ShakeComponent : MonoBehaviour {
     private RectTransform rectTransform;
 
     // [SerializeField]
-    private float shake_speed = 1f;
+    private float shake_speed = 8f;
     // [SerializeField]
     private float radius = 1000f;
 
@@ -28,6 +28,7 @@ public class ShakeComponent : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
+
         if (shake == false) {
            
             rectTransform.anchoredPosition = Vector2.MoveTowards (rectTransform.anchoredPosition, originPosition, shake_speed);
@@ -46,7 +47,7 @@ public class ShakeComponent : MonoBehaviour {
               if (ret == true) {
                   nextPosition = originPosition;
               } else {
-                  nextPosition = new Vector2 (originPosition.x, Random.Range (-5f, 5f));
+                  nextPosition = new Vector2 (originPosition.x, Random.Range (0f, 5f));
               }
               ret = !ret;
           }

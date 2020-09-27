@@ -10,7 +10,7 @@ public class GameData {
 
     public List<ActionData> actions;
 
-    public PlayerData profile;
+    public PlayerData[] profiles;
 
     public ConfigData config;
 

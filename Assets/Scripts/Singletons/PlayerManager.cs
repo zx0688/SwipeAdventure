@@ -40,10 +40,24 @@ namespace Managers {
 
             //if the answer is none 
             if (!SecurePlayerPrefs.HasKey ("profile")) {
-                Services.data.game.profile.timestamp = GameTime.GetTime ();
-                string json = JsonUtility.ToJson (Services.data.game.profile);
+                //Services.data.game.profiles.timestamp = GameTime.GetTime ();
+                //string json = JsonUtility.ToJson (Services.data.game.profiles);
+                // Debug.Log(json);
+                // PlayerData[] players = JsonUtility.FromJson<PlayerData[]> (json);
+
+                foreach (PlayerData p in Services.data.game.profiles) {
+                    if (this == Services.player && p.tags.Contains ("player")) {
+                        playerData = Utils.DeepCopy(p);
+                        break;
+                    } else if (this == Services.enemy && p.tags.Contains ("enemy")) {
+                        playerData = Utils.DeepCopy(p);
+                        break;
+                    }
+
+                }
+
                 //SecurePlayerPrefs.SetString ("profile", json);
-                playerData = JsonUtility.FromJson<PlayerData> (json);
+
             }
 
             OnProfileUpdated?.Invoke ();
@@ -61,6 +75,10 @@ namespace Managers {
             return result;
         }
 
+        public int MaxResourceValue (int id) {
+            ResourceItem rd = playerData.maxValue.Find (_m => _m.id == id);
+            return rd == null ? 0 : rd.count;
+        }
         public int AvailableResource (int id) {
             ResourceItem r = playerData.resources.Find (_r => _r.id == id);
             return r == null ? 0 : r.count;
@@ -99,7 +117,8 @@ namespace Managers {
                 playerData.resources.Add (res);
             }
 
-            int max = Services.data.MaxResource (id);
+            int max = Math.Min (Services.data.MaxResourceValue (id), MaxResourceValue (id));
+          
             if (res.count + count > max)
                 count = max - res.count;
 
@@ -129,9 +148,9 @@ namespace Managers {
                             AddResource (r.id, r.count);
                     } else {
                         if (r.enemy)
-                            enemy.SubResource (r.id, Math.Abs(r.count));
+                            enemy.SubResource (r.id, Math.Abs (r.count));
                         else
-                            SubResource (r.id, Math.Abs(r.count));
+                            SubResource (r.id, Math.Abs (r.count));
                     }
                 }
             }
@@ -147,6 +166,8 @@ namespace Managers {
             cardVO.executed = time;
             SaveCardLocal (cardVO);
 
+
+            enemy.OnProfileUpdated?.Invoke();
             OnProfileUpdated?.Invoke ();
 
             //only for me
@@ -216,7 +237,9 @@ namespace Managers {
         public List<QuestData> activeQuests;
         public List<QuestExecutedItem> completeQuests;
         public List<ResourceItem> resources;
+        public List<ResourceItem> maxValue;
         public string currentLocation;
+        public string[] tags;
         public int timestamp;
         public bool first;
     }

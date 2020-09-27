@@ -87,7 +87,7 @@ namespace Managers {
             return a;
         }
 
-        public int MaxResource (int id) {
+        public int MaxResourceValue (int id) {
             ResourceData r = game.resources.Find (_r => _r.id == id);
             return r.maxValue == 0 ? 99999999 : r.maxValue;
         }

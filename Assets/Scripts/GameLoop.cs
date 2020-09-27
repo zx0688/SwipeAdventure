@@ -20,7 +20,6 @@ public class CardItem {
 }
 public class GameLoop : MonoBehaviour {
 
-
     [SerializeField]
     public GameObject[] cardSwipe;
 
@@ -29,7 +28,6 @@ public class GameLoop : MonoBehaviour {
 
     [HideInInspector]
     public event Action<GameObject> OnNewCard;
-
 
     private int currentViewIndex;
 
@@ -41,7 +39,10 @@ public class GameLoop : MonoBehaviour {
     public CardItem cardItem;
     private CardIconQueue cardIconQueue;
 
+    [SerializeField]
     private GameObject EndTurnCanvas;
+
+    private GameObject heads;
 
     void Awake () {
 
@@ -60,6 +61,7 @@ public class GameLoop : MonoBehaviour {
             card.SetActive (false);
         }
 
+        heads = GameObject.Find ("Head").gameObject;
         //queue = new List<QueueItem> ();
         state = GameLoopState.IDLE;
         EndTurnCanvas = GameObject.Find ("EndGameCanvas");
@@ -78,11 +80,18 @@ public class GameLoop : MonoBehaviour {
         await UniTask.WaitUntil (() => swipe.currentChoise != -1);
     }
 
+    private string getRandomHead () {
+        string[] names = new string[3] { "Orc", "Demon", "Goblin" };
+        return names[UnityEngine.Random.Range (0, names.Length)];
+    }
+
     async UniTaskVoid Loop () {
 
         await UniTask.WaitUntil (() => Services.isInited);
 
         cardIconQueue.CreateQueue ();
+
+        heads.GetComponent<EnemyHead> ().UpdateHead (getRandomHead ());
 
         while (true) {
 
@@ -135,11 +144,15 @@ public class GameLoop : MonoBehaviour {
     }
 
     public async void StartGame () {
+
         await Services.player.Init ();
         await Services.enemy.Init ();
 
+        heads.GetComponent<EnemyHead> ().UpdateHead (getRandomHead ());
         EndTurnCanvas?.SetActive (false);
+
         state = GameLoopState.IDLE;
+
     }
 
     private bool CheckGlobalState (int time) {

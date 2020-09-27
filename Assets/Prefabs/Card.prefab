@@ -293,6 +293,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5302364868964910476}
     m_Modifications:
+    - target: {fileID: 1252811594609928, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1796499804054104, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 1818390954452748, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc, type: 3}
       propertyPath: m_Name
       value: _StartCard
@@ -300,6 +308,14 @@ PrefabInstance:
     - target: {fileID: 1818390954452748, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1818390954452748, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1865880124925572, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 114691296766683156, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc,
         type: 3}
@@ -485,6 +501,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 750
+      objectReference: {fileID: 0}
+    - target: {fileID: 7284779231168921532, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7510913514988580087, guid: dcbac29ed1ccf8548bc2198cb3f1b0bc,
         type: 3}

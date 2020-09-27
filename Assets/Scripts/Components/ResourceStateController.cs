@@ -130,7 +130,7 @@ namespace Controllers {
             if (sliderQuant != null) {
                 sliderQuant.SetValue (_value);
             } else if (slider != null) {
-                int maxValue = Services.data.MaxResource (resourceId);
+                int maxValue = Services.data.MaxResourceValue (resourceId);
                 slider.minValue = 0;
                 slider.maxValue = maxValue;
                 slider.value = _value;
