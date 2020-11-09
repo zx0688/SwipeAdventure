@@ -25,15 +25,20 @@ public class SliderQuant : MonoBehaviour {
     private bool showAction;
 
     private CardItem cardItem;
-
+    private int resId;
+    private bool enemy;
+    public int maxValue;
     // Start is called before the first frame update
     void Start () {
 
         showAction = false;
-        currentValue = maxValue;
+        currentValue = 0;
 
-        for (int i = 0; i < maxValue; i++) {
-            items[i].SetActive (true);
+        resId = GetComponent<ResourceStateController> ().resourceId;
+        enemy = GetComponent<ResourceStateController> ().enemy;
+
+        for (int i = 0; i < items.Count; i++) {
+            items[i].SetActive (false);
         }
 
         Swipe.OnStartSwipe += OnStartShake;
@@ -46,21 +51,15 @@ public class SliderQuant : MonoBehaviour {
 
     private void OnChangeDirection (SwipeDirection direction) {
 
-        //if (showAction == false)
-        //    return;
-
-        bool enemy = GetComponent<ResourceStateController> ().enemy;
-        int resId = GetComponent<ResourceStateController> ().resourceId;
-
         ChoiceData choiseData = null;
         if (cardItem.me == true)
             choiseData = direction == SwipeDirection.LEFT ? cardItem.data.left : cardItem.data.right;
         else
             choiseData = direction == SwipeDirection.LEFT ? cardItem.data.eLeft : cardItem.data.eRight;
-            
-        List<RewardData> result = new List<RewardData>();
-        Services.data.GetResourceReward(result, choiseData.reward, choiseData.cost, 0);
-        
+
+        List<RewardData> result = new List<RewardData> ();
+        Services.data.GetResourceReward (result, choiseData.reward, choiseData.cost, 0);
+
         RewardData rc = result.Find (r => r.count < 0 && r.id == resId && r.enemy == enemy && r.category == GameDataManager.RESOURCE_ID);
         RewardData rr = result.Find (r => r.count > 0 && r.id == resId && r.enemy == enemy && r.category == GameDataManager.RESOURCE_ID);
 
@@ -88,6 +87,17 @@ public class SliderQuant : MonoBehaviour {
     }
 
     private void UpdateValue () {
+
+        for (int i = 0; i < items.Count; i++) {
+            items[i].SetActive (false);
+            items[i].transform.parent.gameObject.SetActive(false);
+        }
+
+        for (int i = 0; i < maxValue; i++) {
+            items[i].SetActive (true);
+            items[i].transform.parent.gameObject.SetActive(true);
+        }
+
         for (int i = 0; i < maxValue; i++) {
             Image image = items[i].GetComponent<Image> ();
             if (i < currentValue) {
@@ -99,10 +109,6 @@ public class SliderQuant : MonoBehaviour {
             }
             items[i].GetComponent<ShakeComponent> ().shake = false;
         }
-    }
-
-    public int maxValue {
-        get { return items.Count; }
     }
 
     public int GetValue () {

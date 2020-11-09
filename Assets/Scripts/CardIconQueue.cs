@@ -28,6 +28,12 @@ public class CardIconQueue : MonoBehaviour {
         }
     }
 
+    public void Clear () {
+        foreach (GameObject i in cardIcons) {
+            i.SetActive (false);
+        }
+    }
+
     public CardItem GetFirstItem () {
         return cardIcons[0].GetComponent<CardIconController> ().data;
     }
@@ -47,6 +53,8 @@ public class CardIconQueue : MonoBehaviour {
     public void CreateQueue () {
         bool me = UnityEngine.Random.Range (0, 1f) > 0.5;
 
+        Clear();
+
         for (int i = 0; i < cardIcons.Count; i++) {
             CardItem q = Services.data.GetNewCard (default (CardData), me, 0);
             me = !me;
@@ -57,8 +65,8 @@ public class CardIconQueue : MonoBehaviour {
 
         GameObject first = cardIcons[0];
 
-        await first.GetComponent<CardIconController>().FadeOut();
-        
+        await first.GetComponent<CardIconController> ().FadeOut ();
+
         for (int i = 0; i < cardIcons.Count - 1; i++) {
             cardIcons[i] = cardIcons[i + 1];
             cardIcons[i].SetActive (true);

@@ -101,6 +101,10 @@ public class GameLoop : MonoBehaviour {
 
             cardItem = cardIconQueue.GetFirstItem ();
 
+            if (Services.data.tutorStep == 0) {
+                Services.player.OnShowFinger (cardItem.me);
+            }
+
             var t1 = cardIconQueue.Shift ();
             var t2 = SwipeCard ();
             await UniTask.WhenAll (t1, t2);
@@ -125,7 +129,11 @@ public class GameLoop : MonoBehaviour {
                 state = GameLoopState.DIABLED;
                 EndTurnCanvas?.SetActive (true);
 
-                Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin", Services.data.isWin (timestamp) } });
+                bool isWin = Services.data.isWin (timestamp);
+
+                
+
+                Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin",  isWin} });
                 Analytics.FlushEvents ();
 
             }
@@ -145,8 +153,12 @@ public class GameLoop : MonoBehaviour {
 
     public async void StartGame () {
 
+        Services.data.IncreaseTutor();
+
         await Services.player.Init ();
         await Services.enemy.Init ();
+
+        cardIconQueue.CreateQueue ();
 
         heads.GetComponent<EnemyHead> ().UpdateHead (getRandomHead ());
         EndTurnCanvas?.SetActive (false);

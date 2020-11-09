@@ -15,7 +15,7 @@ namespace Controllers {
         [SerializeField]
         public bool enemy;
 
-       // [SerializeField]
+        // [SerializeField]
         //private Sprite customSprite;
 
         protected PlayerManager player;
@@ -48,7 +48,7 @@ namespace Controllers {
         private void Init () {
             Services.OnInited -= Init;
 
-          if (!isAvailable())
+            if (!isAvailable ())
                 return;
 
             player = enemy == true ? Services.enemy : Services.player;
@@ -81,7 +81,7 @@ namespace Controllers {
             if (d != null) {
                 d.text = resinfo.name;
             }
-            
+
             if (icon != null) {
                 Image ic = icon.GetComponent<Image> ();
                 ic.sprite = await Services.assets.GetSprite ("Resources/" + resourceId + "/icon", true);
@@ -94,29 +94,28 @@ namespace Controllers {
         }
 
         void OnDisable () {
-            if (Services.isInited && isAvailable()) {
+            if (Services.isInited && isAvailable ()) {
                 player.OnProfileUpdated -= OnUpdateCountP;
                 player.OnResourceUpdated -= OnUpdateCount;
             }
         }
 
         void OnDestroy () {
-            if (Services.isInited && isAvailable()) {
+            if (Services.isInited && isAvailable ()) {
                 player.OnProfileUpdated -= OnUpdateCountP;
                 player.OnResourceUpdated -= OnUpdateCount;
             }
         }
         void OnEnable () {
 
-            if (Services.isInited && isAvailable()) {
+            if (Services.isInited && isAvailable ()) {
                 player.OnProfileUpdated += OnUpdateCountP;
                 player.OnResourceUpdated += OnUpdateCount;
             }
 
         }
 
-        public virtual bool isAvailable()
-        {
+        public virtual bool isAvailable () {
             return resourceId > 0;
         }
 
@@ -126,11 +125,15 @@ namespace Controllers {
                 return;
 
             int _value = player.AvailableResource (resourceId);
+            int maxValue = player.MaxResourceValue (resourceId);
 
             if (sliderQuant != null) {
+
+                sliderQuant.maxValue = maxValue;
                 sliderQuant.SetValue (_value);
+
             } else if (slider != null) {
-                int maxValue = Services.data.MaxResourceValue (resourceId);
+
                 slider.minValue = 0;
                 slider.maxValue = maxValue;
                 slider.value = _value;

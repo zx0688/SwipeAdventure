@@ -28,7 +28,7 @@ namespace Managers {
         private static readonly string URL_VERSION = "";
 
         //private delegate 
-
+        public int tutorStep;
         public GameData game;
         public int version;
         public event Action OnUpdate;
@@ -38,9 +38,11 @@ namespace Managers {
         }
 
         void Start () {
-
+            tutorStep = 0;
         }
-
+        public void IncreaseTutor () {
+            tutorStep++;
+        }
         public void GetResourceReward (List<RewardData> result, List<RewardData> reward, List<RewardData> cost, int time) {
 
             foreach (RewardData r in reward) {
@@ -87,17 +89,20 @@ namespace Managers {
             return a;
         }
 
-        public int MaxResourceValue (int id) {
-            ResourceData r = game.resources.Find (_r => _r.id == id);
-            return r.maxValue == 0 ? 99999999 : r.maxValue;
-        }
-
         public CardItem GetNewCard (CardData card, bool me, int time) {
-            int ID = (int) UnityEngine.Random.Range (0, game.cards.Count - 1);
+
+            List<CardData> available = new List<CardData> ();
+            int maxCard = tutorStep;
+            for (int i = 0; i <= maxCard && i < game.config.tutorial.Count; i++) {
+                int id = game.config.tutorial[i];
+                available.Add (game.cards.Find (c => c.id == id));
+            }
+
+            int ID = (int) UnityEngine.Random.Range (0, available.Count);
 
             CardItem q = new CardItem ();
             q.me = me;
-            q.data = game.cards[ID];
+            q.data = available[ID];
 
             return q;
         }

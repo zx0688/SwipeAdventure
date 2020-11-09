@@ -14,8 +14,11 @@ namespace Managers {
         private static readonly string URL = "";
         public event Action<int, int> OnResourceUpdated;
         public event Action OnProfileUpdated;
+        public event Action<Boolean> ShowFinger;
 
         public PlayerData playerData;
+
+        
 
         public int currentChoise;
 
@@ -24,13 +27,15 @@ namespace Managers {
         }
 
         void Start () {
-
+            
             if (SecurePlayerPrefs.HasKey ("profile")) {
                 Recovery ();
             }
 
             //Facade.meta.OnUpdate += OnMetaUpdate;
         }
+
+       
 
         public async UniTask Init (IProgress<float> progress = null) {
             RequestVO r = new RequestVO ("profile");
@@ -44,18 +49,33 @@ namespace Managers {
                 //string json = JsonUtility.ToJson (Services.data.game.profiles);
                 // Debug.Log(json);
                 // PlayerData[] players = JsonUtility.FromJson<PlayerData[]> (json);
+                playerData = new PlayerData ();
 
                 foreach (PlayerData p in Services.data.game.profiles) {
                     if (this == Services.player && p.tags.Contains ("player")) {
-                        playerData = Utils.DeepCopy(p);
+                        //playerData = Utils.DeepCopy (p);
+                        playerData = Utils.DeepCopyClass (p);
                         break;
                     } else if (this == Services.enemy && p.tags.Contains ("enemy")) {
-                        playerData = Utils.DeepCopy(p);
+                        playerData = Utils.DeepCopyClass (p);
                         break;
                     }
 
                 }
 
+                switch (Services.data.tutorStep) {
+                    case 0:
+                        playerData.resources = Utils.DeepCopyList (playerData.tutorial0);
+                        break;
+                    case 1:
+                        playerData.resources = Utils.DeepCopyList (playerData.tutorial1);
+                        break;
+                    default:
+
+                        break;
+                }
+
+                // playerData.resources = Utils.DeepCopyList (playerData.t);
                 //SecurePlayerPrefs.SetString ("profile", json);
 
             }
@@ -76,7 +96,20 @@ namespace Managers {
         }
 
         public int MaxResourceValue (int id) {
-            ResourceItem rd = playerData.maxValue.Find (_m => _m.id == id);
+
+            ResourceItem rd = null;
+            switch (Services.data.tutorStep) {
+                case 0:
+                    rd = playerData.tutorial0.Find (_m => _m.id == id);
+                    break;
+                case 1:
+                    rd = playerData.tutorial1.Find (_m => _m.id == id);
+                    break;
+                default:
+                    rd = playerData.maxValue.Find (_m => _m.id == id);
+                    break;
+            }
+
             return rd == null ? 0 : rd.count;
         }
         public int AvailableResource (int id) {
@@ -117,8 +150,8 @@ namespace Managers {
                 playerData.resources.Add (res);
             }
 
-            int max = Math.Min (Services.data.MaxResourceValue (id), MaxResourceValue (id));
-          
+            int max = MaxResourceValue (id);
+
             if (res.count + count > max)
                 count = max - res.count;
 
@@ -126,6 +159,10 @@ namespace Managers {
 
             SaveResLocal (res);
             OnResourceUpdated?.Invoke (res.id, count);
+        }
+
+        public void OnShowFinger (bool right) {
+            Services.player.ShowFinger?.Invoke (right);
         }
 
         public void Execute (CardData cardData, int choice, bool me, int time, PlayerManager enemy) {
@@ -166,8 +203,7 @@ namespace Managers {
             cardVO.executed = time;
             SaveCardLocal (cardVO);
 
-
-            enemy.OnProfileUpdated?.Invoke();
+            enemy.OnProfileUpdated?.Invoke ();
             OnProfileUpdated?.Invoke ();
 
             //only for me
@@ -239,6 +275,10 @@ namespace Managers {
         public List<ResourceItem> resources;
         public List<ResourceItem> maxValue;
         public string currentLocation;
+
+        public List<ResourceItem> tutorial0;
+        public List<ResourceItem> tutorial1;
+
         public string[] tags;
         public int timestamp;
         public bool first;

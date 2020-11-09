@@ -21,7 +21,7 @@ public class GameData {
 public class ConfigData {
     public List<ConditionData> win;
     public List<ConditionData> fail;
-
+    public List<int> tutorial;
 }
 
 [Serializable]
