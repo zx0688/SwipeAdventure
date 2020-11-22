@@ -53,6 +53,9 @@ public class CardIconQueue : MonoBehaviour {
     public void CreateQueue () {
         bool me = UnityEngine.Random.Range (0, 1f) > 0.5;
 
+        if(Services.data.tutorStep < 2)
+            me = true;
+
         Clear();
 
         for (int i = 0; i < cardIcons.Count; i++) {

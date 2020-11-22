@@ -12,6 +12,21 @@ namespace Controllers {
         public override bool isAvailable () {
             return resourceId > 0 || tags.Length > 0;
         }
+
+        public void changedPlayer (bool me) {
+            if (Services.isInited && isAvailable ()) {
+                player.OnProfileUpdated -= OnUpdateCountP;
+                player.OnResourceUpdated -= OnUpdateCount;
+            }
+
+            enemy = !me;
+            player = me == true ? Services.player : Services.enemy;
+
+            if (Services.isInited && isAvailable ()) {
+                player.OnProfileUpdated += OnUpdateCountP;
+                player.OnResourceUpdated += OnUpdateCount;
+            }
+        }
         public override void OnUpdateCount (int id, int count) {
 
             if (!isAvailable ())
@@ -22,10 +37,12 @@ namespace Controllers {
 
             ResourceData rd = Services.data.ResInfo (id);
 
-            if (tags.Length > 0 && rd.tags != null && Utils.Intersection(tags, rd.tags))
+            if (tags.Length > 0 && rd.tags != null && Utils.Intersection (tags, rd.tags))
                 return;
 
             int _value = player.AvailableResource (id);
+
+          
 
             icon?.SetActive (_value > 0);
             image?.SetActive (_value > 0);

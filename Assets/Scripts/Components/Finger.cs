@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class Finger : MonoBehaviour
 {
-
+    private static bool[] directions = new bool[]{false, false, true};
 
     private RectTransform rectTransform;
     private Vector2 pivotPoint;
     private Coroutine coroutine;
+    
     void Awake () {
 
         if (Services.isInited)
@@ -44,11 +45,16 @@ public class Finger : MonoBehaviour
     }
 
 
-    private void OnShow(bool right)
+    private void OnShow()
     {
         rectTransform.anchoredPosition = pivotPoint;
         gameObject.SetActive(true);
-        coroutine = StartCoroutine(MoveOn(right == true ? -300 : 300));
+
+        bool right = Services.data.fingerStep < directions.Length ? directions[Services.data.fingerStep] : true;
+
+        Services.data.fingerStep++;
+
+        coroutine = StartCoroutine(MoveOn(right ? -300 : 300));
         coroutine = null;
     }
 

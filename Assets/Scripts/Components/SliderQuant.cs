@@ -58,17 +58,18 @@ public class SliderQuant : MonoBehaviour {
             choiseData = direction == SwipeDirection.LEFT ? cardItem.data.eLeft : cardItem.data.eRight;
 
         List<RewardData> result = new List<RewardData> ();
-        Services.data.GetResourceReward (result, choiseData.reward, choiseData.cost, 0);
+        Services.data.GetResourceReward(result, choiseData.reward, choiseData.cost, 0, false, false, cardItem.me);
 
         RewardData rc = result.Find (r => r.count < 0 && r.id == resId && r.enemy == enemy && r.category == GameDataManager.RESOURCE_ID);
         RewardData rr = result.Find (r => r.count > 0 && r.id == resId && r.enemy == enemy && r.category == GameDataManager.RESOURCE_ID);
 
+      
         for (int i = 0; i < maxValue; i++) {
-            items[i].GetComponent<ShakeComponent> ().shake = false;
+            items[i].GetComponent<ShakeComponent> ().StopShake();
             if (rc != null && i >= (currentValue + rc.count) && i < currentValue) {
-                items[i].GetComponent<ShakeComponent> ().shake = true;
+                items[i].GetComponent<ShakeComponent> ().Shake();
             } else if (rr != null && i < currentValue + rr.count && i >= currentValue) {
-                items[i].GetComponent<ShakeComponent> ().shake = true;
+                items[i].GetComponent<ShakeComponent> ().Shake();
             }
         }
     }
@@ -77,7 +78,7 @@ public class SliderQuant : MonoBehaviour {
         // showAction = false;
 
         for (int i = 0; i < maxValue; i++) {
-            items[i].GetComponent<ShakeComponent> ().shake = false;
+            items[i].GetComponent<ShakeComponent> ().StopShake();
         }
     }
 
@@ -107,7 +108,7 @@ public class SliderQuant : MonoBehaviour {
                 image.sprite = disable;
                 items[i].GetComponent<Animator> ().SetBool ("on", false);
             }
-            items[i].GetComponent<ShakeComponent> ().shake = false;
+            items[i].GetComponent<ShakeComponent> ().StopShake();
         }
     }
 

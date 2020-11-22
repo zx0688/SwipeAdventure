@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +27,9 @@ namespace Controllers {
         private CanvasGroup canvasGroup;
         private bool left;
 
-        private Animator animator;
+        private ResourceOneStateController oneStateController;
+
+       
 
         public Sprite sme;
         public Sprite senemy;
@@ -44,6 +47,9 @@ namespace Controllers {
             leftAvailable = true;
             rightAvailable = true;
 
+            oneStateController.changedPlayer(me);
+            oneStateController.OnUpdateCountP();
+
             UpdateHUD ();
             //UpdateEffectPanel ();
 
@@ -54,11 +60,18 @@ namespace Controllers {
 
         public async UniTask FadeIn () {
 
+          
             GetComponent<Swipe> ().ConstructNewSwipe ();
-            GetComponent<Animator> ().SetTrigger ("fadein");
-            while (GetComponent<Animator> ().GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
-                await UniTask.Yield ();
-            }
+
+            RectTransform rectTransform = GetComponent<RectTransform>();
+            rectTransform.anchoredPosition = new Vector2(0f, 130f);
+            
+            await rectTransform.DOAnchorPosY (0f, 0.5f).AsyncWaitForCompletion();
+        
+            //while (GetComponent<Animator> ().GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
+            //    await UniTask.Yield ();
+            //}
+
 
             GetComponent<Swipe> ().StartSwipe ();
         }
@@ -141,7 +154,13 @@ namespace Controllers {
                 rs.Add (r);
             }
 
+            int increaseCount = me == true ? Services.player.AvailableResource(4) : Services.enemy.AvailableResource(4);
             foreach (RewardData r in chd.reward) {
+                RewardData _r = Utils.DeepCopyClass<RewardData>(r);
+
+                if(increaseCount > 0 && _r.category == GameDataManager.ACTION_ID && _r.id == 2)
+                    _r.count *= 2;
+
                 rs.Add (r);
             }
 
@@ -164,6 +183,7 @@ namespace Controllers {
 
         void Start () {
             swipe = GetComponent<Swipe> ();
+            oneStateController = transform.Find("Increase").GetComponent<ResourceOneStateController>();
 
             Swipe.OnChangeDirection += OnChangeDirection;
             //canvasGroup = actionPanel.GetComponent<CanvasGroup> ();
@@ -173,9 +193,14 @@ namespace Controllers {
             leftAvailable = true;
             rightAvailable = true;
 
-            if (Swipe.state != SwipeState.DRAG)
+            if (Swipe.state != SwipeState.DRAG || !gameObject.activeSelf)
                 return;
 
+
+            Debug.Log(me);
+
+            if(this.me == false)
+                return;
 
             List<ConditionData> _conditions = null;
             if(me == true)
@@ -188,7 +213,7 @@ namespace Controllers {
             }
 
             int time = GameTime.GetTime ();
-            List<ConditionData> conditions = Services.data.GetUnavailableConditions (_conditions, time);
+            List<ConditionData> conditions = Services.data.GetUnavailableConditions (_conditions, time, false, me);
 
             if (conditions.Count == 0)
                 return;

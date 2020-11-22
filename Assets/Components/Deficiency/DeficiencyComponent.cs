@@ -28,10 +28,10 @@ public class DeficiencyComponent : MonoBehaviour {
 
         deficiency.SetActive(false);
 
-        CardController.OnUnavailableCondition += show;
+        CardController.OnUnavailableCondition += Show;
     }
 
-    private void show (ConditionData c) {
+    private void Show (ConditionData c) {
         if (c.category != GameDataManager.RESOURCE_ID || c.enemy != enemy || c.id != id)
             return;
 

@@ -17,9 +17,7 @@ public class EndGamePopup : MonoBehaviour {
     private Transform glowContainer;
     private Transform glowBack;
     private GameObject glowIcon;
-
     private Image icon;
-
     private Text buttonTf;
 
     void Start () {
@@ -29,6 +27,10 @@ public class EndGamePopup : MonoBehaviour {
     }
 
     void OnEnable () {
+
+        if (!Services.isInited)
+            return;
+
         bool isWin = Services.data.isWin (1);
         headerImgFail.gameObject.SetActive (false);
         headerImgWin.gameObject.SetActive (false);
@@ -46,7 +48,7 @@ public class EndGamePopup : MonoBehaviour {
         color.a = 0f;
         back.color = color;
 
-        back.DOFade (0.6f, 1f);
+        back.DOFade(0.6f, 1f);
 
         UpdateIcon ().Forget ();
 
@@ -62,7 +64,7 @@ public class EndGamePopup : MonoBehaviour {
 
         if (Services.isInited == false) {
             icon.sprite = await Services.assets.GetSprite ("WinSword", true);
-        } else if (Services.data.tutorStep > Services.data.game.config.tutorial.Count) {
+        } else if (Services.data.tutorStep >= Services.data.game.config.tutorial.Count) {
             icon.sprite = await Services.assets.GetSprite ("WinSword", true);
         } else {
             int step = Services.data.tutorStep + 1;

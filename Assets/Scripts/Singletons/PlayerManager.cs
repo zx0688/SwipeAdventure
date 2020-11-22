@@ -14,11 +14,9 @@ namespace Managers {
         private static readonly string URL = "";
         public event Action<int, int> OnResourceUpdated;
         public event Action OnProfileUpdated;
-        public event Action<Boolean> ShowFinger;
+        public event Action ShowFinger;
 
         public PlayerData playerData;
-
-        
 
         public int currentChoise;
 
@@ -27,15 +25,13 @@ namespace Managers {
         }
 
         void Start () {
-            
+
             if (SecurePlayerPrefs.HasKey ("profile")) {
                 Recovery ();
             }
 
             //Facade.meta.OnUpdate += OnMetaUpdate;
         }
-
-       
 
         public async UniTask Init (IProgress<float> progress = null) {
             RequestVO r = new RequestVO ("profile");
@@ -65,10 +61,10 @@ namespace Managers {
 
                 switch (Services.data.tutorStep) {
                     case 0:
-                        playerData.resources = Utils.DeepCopyList (playerData.tutorial0);
+                        playerData.resources = Utils.DeepCopyList (playerData.tutorial0.current);
                         break;
                     case 1:
-                        playerData.resources = Utils.DeepCopyList (playerData.tutorial1);
+                        playerData.resources = Utils.DeepCopyList (playerData.tutorial1.current);
                         break;
                     default:
 
@@ -83,7 +79,7 @@ namespace Managers {
             OnProfileUpdated?.Invoke ();
         }
 
-        public List<ResourceItem> GetEffects () {
+        /*public List<ResourceItem> GetEffects () {
             List<ResourceItem> result = new List<ResourceItem> ();
             foreach (ResourceItem r in playerData.resources) {
                 if (r.count == 0)
@@ -93,17 +89,17 @@ namespace Managers {
                     result.Add (r);
             }
             return result;
-        }
+        }*/
 
         public int MaxResourceValue (int id) {
 
             ResourceItem rd = null;
             switch (Services.data.tutorStep) {
                 case 0:
-                    rd = playerData.tutorial0.Find (_m => _m.id == id);
+                    rd = playerData.tutorial0.max.Find (_m => _m.id == id);
                     break;
                 case 1:
-                    rd = playerData.tutorial1.Find (_m => _m.id == id);
+                    rd = playerData.tutorial1.max.Find (_m => _m.id == id);
                     break;
                 default:
                     rd = playerData.maxValue.Find (_m => _m.id == id);
@@ -111,6 +107,10 @@ namespace Managers {
             }
 
             return rd == null ? 0 : rd.count;
+        }
+
+        public static int GetAvailableResource (RewardData r) {
+            return r.enemy ? Services.enemy.AvailableResource (r.id) : Services.player.AvailableResource (r.id);
         }
         public int AvailableResource (int id) {
             ResourceItem r = playerData.resources.Find (_r => _r.id == id);
@@ -120,6 +120,18 @@ namespace Managers {
         public CardExecutedItem GetExecutedCard (int id) {
             CardExecutedItem card = playerData.cards.Find (c => c.id == id);
             return card;
+        }
+
+        public void ClearResource (int id) {
+            ResourceItem res = playerData.resources.Find (r => r.id == id);
+
+            if (res == null || res.count == 0)
+                return;
+
+            int count = res.count;
+            res.count = 0;
+            SaveResLocal (res);
+            OnResourceUpdated?.Invoke (res.id, -count);
         }
 
         public void SubResource (int id, int count) {
@@ -138,6 +150,7 @@ namespace Managers {
 
             SaveResLocal (res);
             OnResourceUpdated?.Invoke (res.id, -count);
+
         }
 
         public void AddResource (int id, int count) {
@@ -161,8 +174,8 @@ namespace Managers {
             OnResourceUpdated?.Invoke (res.id, count);
         }
 
-        public void OnShowFinger (bool right) {
-            Services.player.ShowFinger?.Invoke (right);
+        public void OnShowFinger () {
+            Services.player.ShowFinger?.Invoke ();
         }
 
         public void Execute (CardData cardData, int choice, bool me, int time, PlayerManager enemy) {
@@ -174,9 +187,9 @@ namespace Managers {
                 chMeta = choice == Swipe.LEFT_CHOICE ? cardData.eLeft : cardData.eRight;
             }
 
-            if (Services.data.CheckConditions (chMeta.conditions, time)) {
+            if (Services.data.CheckConditions (chMeta.conditions, time, false, me)) {
                 List<RewardData> result = new List<RewardData> ();
-                Services.data.GetResourceReward (result, chMeta.reward, chMeta.cost, time);
+                Services.data.GetResourceReward (result, chMeta.reward, chMeta.cost, time, true, false, me);
                 foreach (RewardData r in result) {
                     if (r.count > 0) {
                         if (r.enemy)
@@ -190,6 +203,7 @@ namespace Managers {
                             SubResource (r.id, Math.Abs (r.count));
                     }
                 }
+
             }
 
             CardExecutedItem cardVO = playerData.cards.Find (c => c.id == cardData.id);
@@ -209,46 +223,6 @@ namespace Managers {
             //only for me
             if (this == Services.player) {
                 Services.network.AddRequestToPool (new RequestVO ("choise"));
-            }
-        }
-
-        private void AcceptCostReward (List<RewardData> cost, List<RewardData> rewards, int time, PlayerManager enemy) {
-
-            foreach (RewardData r in cost) {
-                switch (r.category) {
-                    case 0:
-                        //card
-                        break;
-                    case 1:
-                        if (r.enemy)
-                            enemy.SubResource (r.id, r.count);
-                        else
-                            SubResource (r.id, r.count);
-                        break;
-                }
-            }
-
-            foreach (RewardData r in rewards) {
-                switch (r.category) {
-                    case 0:
-                        //card
-                        break;
-                    case 1:
-                        if (r.enemy)
-                            enemy.AddResource (r.id, r.count);
-                        else
-                            AddResource (r.id, r.count);
-                        break;
-                    case 3:
-
-                        Debug.Log (r.id);
-                        ActionData ad = Services.data.ActionInfo (r.id);
-                        if (Services.data.CheckConditions (ad.conditions, time)) {
-                            for (int i = 0; i < r.count; i++)
-                                AcceptCostReward (ad.cost, ad.reward, time, enemy);
-                        }
-                        break;
-                }
             }
         }
 
@@ -276,12 +250,18 @@ namespace Managers {
         public List<ResourceItem> maxValue;
         public string currentLocation;
 
-        public List<ResourceItem> tutorial0;
-        public List<ResourceItem> tutorial1;
+        public TutorialData tutorial0;
+        public TutorialData tutorial1;
 
         public string[] tags;
         public int timestamp;
         public bool first;
+    }
+
+    [Serializable]
+    public class TutorialData {
+        public List<ResourceItem> current;
+        public List<ResourceItem> max;
     }
 
     [Serializable]

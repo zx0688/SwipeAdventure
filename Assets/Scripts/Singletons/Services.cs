@@ -60,27 +60,32 @@ namespace Managers {
         }
         // Start is called before the first frame update
         void Start () {
+
             Init ().Forget ();
         }
 
         public async UniTaskVoid Init () {
 
+
+            DontDestroyOnLoad(this);
             GameTime.Init(DateTime.Now.Second);
 
-            UpdateTextUI ("Loading assets...");
+           // UpdateTextUI ("Loading assets...");
             await assets.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-            UpdateTextUI ("Loading network...");
+           // UpdateTextUI ("Loading network...");
             await network.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-            UpdateTextUI ("Loading game data...");
+           // UpdateTextUI ("Loading game data...");
             await data.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-            UpdateTextUI ("Loading profile...");
+           // UpdateTextUI ("Loading profile...");
             await player.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
             await enemy.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-            UpdateTextUI ("Loading scene...");
+            //UpdateTextUI ("Loading scene...");
+            await UniTask.Delay(100, false);
+            
             Scene s = SceneManager.GetActiveScene ();
             if (s.name != "Main") {
                 await SceneManager.LoadSceneAsync ("Main").ToUniTask (Progress.Create<float> (x => UpdateProgressUI (x)));
@@ -88,7 +93,7 @@ namespace Managers {
 
             UpdateProgressUI (1);
 
-            await UniTask.DelayFrame (2);
+            await UniTask.Delay(100, false);
 
             state = MState.INITED;
             OnInited?.Invoke ();

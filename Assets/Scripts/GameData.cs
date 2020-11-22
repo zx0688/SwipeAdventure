@@ -9,12 +9,29 @@ public class GameData {
     public List<QuestData> quests;
 
     public List<ActionData> actions;
+    public List<BuffData> buffs;
 
     public PlayerData[] profiles;
 
     public ConfigData config;
 
     public int timestamp;
+}
+
+[Serializable]
+public class BuffData {
+    public int id;
+    public string[] tags;
+    public string name;
+    public string description;
+    public List<ConditionData> conditions;
+    public List<RewardData> cost;
+    public List<RewardData> reward;
+    public int trigger;
+    public bool swipe;
+    public bool disable;
+    public int factor;
+
 }
 
 [Serializable]
@@ -59,7 +76,7 @@ public class CardData {
     public float chance;
     public int locked;
 
-    public bool once;
+    public bool off;
     public bool validate;
     public string image;
     public string icon;

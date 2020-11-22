@@ -29,7 +29,8 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
 
     [SerializeField] public Canvas _parent;
     [SerializeField] private float fMovingSpeed = 15;
-    [Range (0f, 1000f)] public float swipeDetectionLimit_LR = 1f;
+    //[Range (0f, 1000f)] 
+    public float swipeDetectionLimit_LR = 300f;
     [SerializeField] private float fRotation = 0;
     [SerializeField] private float fScale = 1f;
 
@@ -78,6 +79,7 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
         vector = Vector2.zero;
         currentChoise = -1;
         StopAllCoroutines ();
+
         rectTransform.anchoredPosition = pivotPoint;
         rectTransform.rotation = Quaternion.Euler (0, 0, 0);
         rectTransform.localScale = new Vector3 (1f, 1f, 1f);
@@ -85,7 +87,7 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
     }
     public void StartSwipe () {
         state = SwipeState.IDLE;
-        GetComponent<Animator> ().enabled = false;
+       // GetComponent<Animator> ().enabled = false;
 
  
 
@@ -200,7 +202,6 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
                 TriggerRight ();
             }
             state = SwipeState.DISABLE;
-            GetComponent<Animator> ().enabled = true;
             eventData.pointerDrag = null;
             OnEndSwipe?.Invoke ();
 
@@ -284,16 +285,15 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
 
         Vector2 v = (rectTransform.anchoredPosition - pivotPoint);
         v.Normalize ();
-        v *= fMovingSpeed;
+        v *= 15f;//fMovingSpeed;
 
         while (CheckOnCamera ()) {
 
             rectTransform.anchoredPosition += v;
             yield return null;
         }
-        rectTransform.anchoredPosition += 5 * v;
-
-        GetComponent<Animator> ().SetTrigger ("fadeout");
+        rectTransform.anchoredPosition += 6 * v;
+        gameObject.SetActive(false);
     }
 
 }

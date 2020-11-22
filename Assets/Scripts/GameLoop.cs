@@ -75,7 +75,7 @@ public class GameLoop : MonoBehaviour {
     }
 
     public async UniTask SwipeCard () {
-        OpenNewCard ();
+        await OpenNewCard ();
         Swipe swipe = cardSwipe[currentViewIndex].GetComponent<Swipe> ();
         await UniTask.WaitUntil (() => swipe.currentChoise != -1);
     }
@@ -100,10 +100,6 @@ public class GameLoop : MonoBehaviour {
             int currentChoise = -1;
 
             cardItem = cardIconQueue.GetFirstItem ();
-
-            if (Services.data.tutorStep == 0) {
-                Services.player.OnShowFinger (cardItem.me);
-            }
 
             var t1 = cardIconQueue.Shift ();
             var t2 = SwipeCard ();
@@ -131,9 +127,7 @@ public class GameLoop : MonoBehaviour {
 
                 bool isWin = Services.data.isWin (timestamp);
 
-                
-
-                Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin",  isWin} });
+                Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin", isWin } });
                 Analytics.FlushEvents ();
 
             }
@@ -153,7 +147,11 @@ public class GameLoop : MonoBehaviour {
 
     public async void StartGame () {
 
-        Services.data.IncreaseTutor();
+        Services.data.fingerStep = 0;
+        if(Services.data.isWin (0))
+        {
+            Services.data.IncreaseTutor ();
+        }
 
         await Services.player.Init ();
         await Services.enemy.Init ();
@@ -176,9 +174,9 @@ public class GameLoop : MonoBehaviour {
         return true;
     }
 
-    private void OpenNewCard () {
+    public async UniTask OpenNewCard () {
 
-        cardSwipe[currentViewIndex].SetActive (false);
+        //cardSwipe[currentViewIndex].SetActive (false);
 
         currentViewIndex++;
         if (currentViewIndex >= cardSwipe.Length) {
@@ -203,7 +201,11 @@ public class GameLoop : MonoBehaviour {
 
         OnNewCard?.Invoke (cardSwipe[currentViewIndex]);
 
-        cardSwipe[currentViewIndex].GetComponent<CardController> ().FadeIn ().Forget ();
+        await cardSwipe[currentViewIndex].GetComponent<CardController> ().FadeIn ();
+
+        if (Services.data.tutorStep == 0) {
+            Services.player.OnShowFinger ();
+        }
         /*  var cd = FindObjectsOfType<MonoBehaviour> ().OfType<ICardUpdate<GameObject>> ();
          foreach (ICardUpdate<GameObject> c in cd) {
              c.CardUpdate (cardViews[currentViewIndex]);

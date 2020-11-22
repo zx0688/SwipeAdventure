@@ -27,6 +27,7 @@ namespace Controllers {
         public void UpdateData (RewardData data) {
 
             this.data = data;
+
             this.gameObject.SetActive (false);
             UpdateHUD ().Forget ();
         }

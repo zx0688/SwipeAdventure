@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Cysharp.Threading.Tasks;
 using UnityEditor;
@@ -19,11 +20,11 @@ namespace Managers {
         public static GameDataManager instance = null;
         public static readonly string EFFECT = "effect";
 
-#if UNITY_STANDALONE_WIN
-        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y";
-#else
-        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
-#endif
+//#if UNITY_STANDALONE_WIN
+  //private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
+//#else
+       private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
+//#endif
         private static readonly string URL_META = "";
         private static readonly string URL_VERSION = "";
 
@@ -31,6 +32,7 @@ namespace Managers {
         public int tutorStep;
         public GameData game;
         public int version;
+        public int fingerStep;
         public event Action OnUpdate;
 
         void Awake () {
@@ -39,41 +41,70 @@ namespace Managers {
 
         void Start () {
             tutorStep = 0;
+            fingerStep = 0;
         }
         public void IncreaseTutor () {
             tutorStep++;
         }
-        public void GetResourceReward (List<RewardData> result, List<RewardData> reward, List<RewardData> cost, int time) {
+
+        public void GetResourceReward (List<RewardData> result, List<RewardData> reward, List<RewardData> cost, int time, bool swipe, bool isAction, bool me) {
 
             foreach (RewardData r in reward) {
-                if (!Services.data.CheckConditions (r.conditions, time))
-                    continue;
+
                 if (r.category == RESOURCE_ID) {
-                    RewardData _r = GetRewardItem (result, r);
+                    RewardData _r = GetRewardItem (result, r, isAction, me);
                     _r.count += r.count;
                 } else if (r.category == ACTION_ID) {
                     ActionData a = ActionInfo (r.id);
-                    for (int i = 0; i < r.count; i++)
-                        GetResourceReward (result, a.reward, a.cost, time);
+                    if (!Services.data.CheckConditions (a.conditions, time, true, me))
+                        continue;
+
+                    int count = r.count;
+                    foreach (BuffData b in Services.data.game.buffs) {
+                        if (b.swipe == true && b.swipe != swipe)
+                            continue;
+                        if (!Services.data.CheckConditions (b.conditions, time, true, me))
+                            continue;
+                        if (b.trigger != a.id)
+                            continue;
+
+                        GetResourceReward (result, b.reward, b.cost, time, swipe, true, me);
+
+                        if (b.disable) {
+                            count = 0;
+                            continue;
+                        }
+
+                        if (b.factor > 0) {
+                            count *= b.factor;
+                            continue;
+                        }
+
+                    }
+
+                    for (int i = 0; i < count; i++)
+                        GetResourceReward (result, a.reward, a.cost, time, swipe, true, me);
                 }
             }
+
             foreach (RewardData r in cost) {
-                if (!Services.data.CheckConditions (r.conditions, time))
+                if (!Services.data.CheckConditions (r.conditions, time, isAction, me))
                     continue;
                 if (r.category == RESOURCE_ID) {
-                    RewardData _r = GetRewardItem (result, r);
+                    RewardData _r = GetRewardItem (result, r, isAction, me);
                     _r.count -= r.count;
                 }
             }
         }
 
-        private RewardData GetRewardItem (List<RewardData> list, RewardData item) {
-            RewardData r = list.Find (i => i.id == item.id && i.enemy == item.enemy && i.category == item.category);
+        private RewardData GetRewardItem (List<RewardData> list, RewardData item, bool isAction, bool me) {
+            bool enemy = isAction == true && me == false ? (!item.enemy) : item.enemy;
+            RewardData r = list.Find (i => i.id == item.id && i.enemy == enemy && i.category == item.category);
             if (r == null) {
                 r = new RewardData ();
                 r.count = 0;
                 r.id = item.id;
-                r.enemy = item.enemy;
+                r.enemy = enemy;
                 r.category = item.category;
                 list.Add (r);
             }
@@ -116,22 +147,24 @@ namespace Managers {
             return true;
         }
 
-        public List<ConditionData> GetUnavailableConditions (List<ConditionData> conditions, int time) {
+        public List<ConditionData> GetUnavailableConditions (List<ConditionData> conditions, int time, bool isAction, bool me) {
 
             List<ConditionData> result = new List<ConditionData> ();
             foreach (ConditionData c in conditions) {
                 List<ConditionData> checkList = new List<ConditionData> ();
                 checkList.Add (c);
-                if (!CheckConditions (checkList, time))
+                if (!CheckConditions (checkList, time, isAction, me))
                     result.Add (c);
             }
             return result;
         }
 
-        public bool CheckConditions (List<ConditionData> conditions, int time) {
+        public bool CheckConditions (List<ConditionData> conditions, int time, bool isAction, bool me) {
             //bool resule = true;
             foreach (ConditionData c in conditions) {
-                PlayerManager player = c.enemy == true ? Services.enemy : Services.player;
+
+                bool enemy = isAction == true && me == false ? (!c.enemy) : c.enemy;
+                PlayerManager player = enemy == true ? Services.enemy : Services.player;
 
                 if (c.location != null && c.location != "" && player.playerData.currentLocation != c.location)
                     return false;
@@ -181,11 +214,11 @@ namespace Managers {
         }
 
         public bool isWin (int time) {
-            return CheckConditions (game.config.win, time);
+            return CheckConditions (game.config.win, time, false, true);
         }
 
         public bool isFail (int time) {
-            return CheckConditions (game.config.fail, time);
+            return CheckConditions (game.config.fail, time, false, true);
         }
 
         /*private void CheckTrigger (int time) {
@@ -247,6 +280,9 @@ namespace Managers {
                 SecurePlayerPrefs.SetInt ("meta_version", version);
                 OnUpdate?.Invoke ();
             }
+
+            game.cards = game.cards.Where (c => c.off != true).ToList ();
+            Debug.Log ("");
         }
 
         // Update is called once per frame

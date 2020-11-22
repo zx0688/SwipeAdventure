@@ -66,7 +66,7 @@ namespace Controllers {
             OnUpdateCountP ();
         }
 
-        private void OnUpdateCountP () {
+        public void OnUpdateCountP () {
             OnUpdateCount (resourceId, 0);
         }
 
