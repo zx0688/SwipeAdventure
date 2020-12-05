@@ -25,6 +25,7 @@ public class EnemyHead : MonoBehaviour {
     void Awake () {
 
         Transform d = transform.Find ("Damage");
+        emotion = transform.Find ("Emotion").GetComponent<Image> ();
         damage = d.gameObject;
 
         if (Services.isInited)
@@ -34,7 +35,6 @@ public class EnemyHead : MonoBehaviour {
     }
 
     void Start () {
-        emotion = transform.Find ("Emotion").GetComponent<Image> ();
 
     }
 
@@ -45,9 +45,7 @@ public class EnemyHead : MonoBehaviour {
         Transform g = transform.Find ("Back");
         g.GetComponent<Image> ().sprite = atlas.GetSprite (head + "_Head");
 
-        
-
-        damage.GetComponent<Image>().sprite = atlas.GetSprite (head + "_damage0");
+        damage.GetComponent<Image> ().sprite = atlas.GetSprite (head + "_damage0");
         damage.SetActive (false);
 
         OnSetDefaultFace ();
@@ -75,7 +73,7 @@ public class EnemyHead : MonoBehaviour {
     }
 
     private void OnDamage (int id, int value) {
-        if (id != 1)
+        if (id != 1 || gameObject.activeInHierarchy == false)
             return;
 
         StopCoroutine (WaitAndSetDefault ());
@@ -89,18 +87,32 @@ public class EnemyHead : MonoBehaviour {
             return;
         }
 
-        emotion.sprite = atlas.GetSprite (headId + "_emotion2");
+        bool me = GameLoop.cardItem != null? GameLoop.cardItem.me : true;
+
+        emotion.sprite = me == false ? atlas.GetSprite (headId + "_emotion4") : atlas.GetSprite (headId + "_emotion2");
+    }
+
+    public void SetCustomEmotion(string name)
+    {
+        emotion.sprite = atlas.GetSprite (headId + "_" + name);
     }
 
     private void OnSetDefaultFace () {
-        GameLoop gl = gameScripts.GetComponent<GameLoop> ();
 
-        if(gl.cardItem == null)
-        {
-            emotion.sprite = atlas.GetSprite (headId + "_emotion4");
-            return; 
+        int current = Services.enemy.AvailableResource (resourceId);
+
+        if (current == 0) {
+            emotion.sprite = atlas.GetSprite (headId + "_emotion5");
+            return;
         }
-        emotion.sprite = gl?.cardItem.me == false ? atlas.GetSprite (headId + "_emotion4") : atlas.GetSprite (headId + "_emotion1");
+
+        if (GameLoop.cardItem == null) {
+            emotion.sprite = atlas.GetSprite (headId + "_emotion4");
+            return;
+        }
+
+        bool me = GameLoop.cardItem != null? GameLoop.cardItem.me : true;
+        emotion.sprite = me == false ? atlas.GetSprite (headId + "_emotion1") : atlas.GetSprite (headId + "_emotion1");
     }
 
     private void OnUpdateHit () {
@@ -114,21 +126,16 @@ public class EnemyHead : MonoBehaviour {
 
         int max = Services.enemy.MaxResourceValue (resourceId);
 
-        if(max == current)
-        {
-            damage.SetActive(false);
+        if (max == current) {
+            damage.SetActive (false);
             return;
         }
 
-        damage.SetActive(true);
+        damage.SetActive (true);
 
         int step = 2 - Mathf.FloorToInt (3f * current / (max));
 
         damage.GetComponent<Image> ().sprite = atlas.GetSprite (headId + "_damage" + step);
     }
 
-    // Update is called once per frame
-    void Update () {
-
-    }
 }

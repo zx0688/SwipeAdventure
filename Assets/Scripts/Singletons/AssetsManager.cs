@@ -12,6 +12,7 @@ using UnityEngine.Networking;
 namespace Managers {
     public class AssetsManager : MonoBehaviour {
         private static readonly string BASE_URL = "";
+        private AudioSource audio;
 
         void Awake () {
 
@@ -20,6 +21,8 @@ namespace Managers {
         //private Dictionary<string, Sprite> spriteCache;
 
         public async UniTask Init (IProgress<float> progress = null) {
+
+            audio = gameObject.GetComponent<AudioSource>();
             /*
             #if UNITY_EDITOR
                         var path = Path.Combine (Directory.GetParent (Application.dataPath).FullName, "_EditorCache");
@@ -74,13 +77,37 @@ namespace Managers {
             //CacheJson (name, jsonFromUrl);
             return jsonFromUrl;
         }
+
+        public async UniTaskVoid PlaySound (string name) {
+            
+            AudioClip clip = await GetSound (name, true);
+            audio.PlayOneShot (clip);
+        }
+        public async UniTask<AudioClip> GetSound (string name, bool fromResources, IProgress<float> progress = null) {
+
+            if (fromResources) {
+
+                return Resources.Load<AudioClip> ("Sound/" + name);
+            }
+            UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip (BASE_URL + name, AudioType.WAV);
+
+            await request.SendWebRequest ().ToUniTask (progress: progress);
+
+            if (request.isNetworkError || request.isHttpError) {
+                Debug.LogWarning ("Cant find " + name);
+                return null;
+            }
+
+            AudioClip clip = ((DownloadHandlerAudioClip) request.downloadHandler).audioClip;
+            return clip;
+        }
         public async UniTask<Sprite> GetSprite (string name, bool fromResources, IProgress<float> progress = null) {
 
             if (fromResources) {
 
                 return Resources.Load<Sprite> (name);
                 //var (isCanceled, asset) = await Resources.LoadAsync<Sprite> (name).ToUniTask (progress: progress).SuppressCancellationThrow ();
-               // if (asset != null && isCanceled == false) {
+                // if (asset != null && isCanceled == false) {
 
                 //    return asset as Sprite;
                 //}

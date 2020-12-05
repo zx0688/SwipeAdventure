@@ -32,9 +32,9 @@ namespace Managers {
                 return instance != null && instance.state == MState.INITED;
             }
         }
-        public volatile MState state;
-        [SerializeField]
-        private Text loadText;
+        public MState state = MState.INITIALIZATING;
+        //[SerializeField]
+        // private Text loadText;
 
         [SerializeField]
         private Slider slider;
@@ -51,7 +51,7 @@ namespace Managers {
                 assets = GetComponent<AssetsManager> ();
                 enemy = GetComponent<EnemyManager> ();
 
-                DontDestroyOnLoad (gameObject);
+               // DontDestroyOnLoad (gameObject);
 
             } else {
                 DestroyImmediate (gameObject);
@@ -66,42 +66,39 @@ namespace Managers {
 
         public async UniTaskVoid Init () {
 
+            DontDestroyOnLoad (this);
+            GameTime.Init (DateTime.Now.Second);
 
-            DontDestroyOnLoad(this);
-            GameTime.Init(DateTime.Now.Second);
-
-           // UpdateTextUI ("Loading assets...");
+            // UpdateTextUI ("Loading assets...");
             await assets.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-           // UpdateTextUI ("Loading network...");
+            // UpdateTextUI ("Loading network...");
             await network.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-           // UpdateTextUI ("Loading game data...");
+            // UpdateTextUI ("Loading game data...");
             await data.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
-           // UpdateTextUI ("Loading profile...");
+            // UpdateTextUI ("Loading profile...");
             await player.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
             await enemy.Init (Progress.Create<float> (x => UpdateProgressUI (x)));
 
             //UpdateTextUI ("Loading scene...");
-            await UniTask.Delay(100, false);
-            
+
             Scene s = SceneManager.GetActiveScene ();
             if (s.name != "Main") {
                 await SceneManager.LoadSceneAsync ("Main").ToUniTask (Progress.Create<float> (x => UpdateProgressUI (x)));
             }
 
-            UpdateProgressUI (1);
-
-            await UniTask.Delay(100, false);
+            //await UniTask.DelayFrame (2);
+            //UpdateProgressUI (1);
 
             state = MState.INITED;
             OnInited?.Invoke ();
         }
 
         private void UpdateTextUI (string text) {
-            if (loadText != null)
-                loadText.text = text;
+            // if (loadText != null)
+            //    loadText.text = text;
         }
         private void UpdateProgressUI (float progress) {
             if (slider != null)

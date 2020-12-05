@@ -20,16 +20,19 @@ namespace Managers {
         public static GameDataManager instance = null;
         public static readonly string EFFECT = "effect";
 
-//#if UNITY_STANDALONE_WIN
-  //private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
-//#else
-       private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
-//#endif
+        //#if UNITY_EDITOR_WIN
+        private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y";
+        //#else
+        //https://drive.google.com/file/d/10u6GCbjRsoW0yIfk5VpSbPsHvNnn-C4y/view?usp=sharing
+        //       private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
+        //#endif
         private static readonly string URL_META = "";
         private static readonly string URL_VERSION = "";
 
         //private delegate 
         public int tutorStep;
+        public int swipeCount;
+
         public GameData game;
         public int version;
         public int fingerStep;
@@ -42,6 +45,7 @@ namespace Managers {
         void Start () {
             tutorStep = 0;
             fingerStep = 0;
+
         }
         public void IncreaseTutor () {
             tutorStep++;

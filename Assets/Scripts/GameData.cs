@@ -39,6 +39,7 @@ public class ConfigData {
     public List<ConditionData> win;
     public List<ConditionData> fail;
     public List<int> tutorial;
+    public List<int> tutstep;
 }
 
 [Serializable]
@@ -141,6 +142,7 @@ public class ResourceData {
     public string[] tags;
     public float inapp;
     public int priority;
+    public bool image2enemy;
 
     public bool hide;
     public string image;

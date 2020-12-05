@@ -49,8 +49,6 @@ namespace Controllers {
                 }
             }
 
-            
-
             for (int i = 0; i < icons.Length; i++) {
 
                 if (i > data.count - 1) {
@@ -65,7 +63,12 @@ namespace Controllers {
                     icon.sprite = await Services.assets.GetSprite ("Actions/" + ad.id + "/icon", true);
                 } else {
                     ResourceData res = Services.data.ResInfo (data.id);
-                    icon.sprite = await Services.assets.GetSprite ("Resources/" + res.id + "/icon", true);
+                    bool me = GameLoop.cardItem != null? GameLoop.cardItem.me : true;
+                    if (res.image2enemy)
+                        icon.sprite = await Services.assets.GetSprite ("Resources/" + res.id + "/icon_" + (me ? "me" : "enemy"), true);
+                    else
+                        icon.sprite = await Services.assets.GetSprite ("Resources/" + res.id + "/icon", true);
+
                 }
             }
 

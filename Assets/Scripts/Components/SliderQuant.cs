@@ -84,7 +84,7 @@ public class SliderQuant : MonoBehaviour {
 
     private void OnStartShake () {
         //showAction = true;
-        cardItem = gameScripts.GetComponent<GameLoop> ().cardItem;
+        cardItem = GameLoop.cardItem;
     }
 
     private void UpdateValue () {

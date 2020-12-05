@@ -64,6 +64,7 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
     private RectTransform rectTransform;
 
     void Awake () {
+        currentChoise = -1;
         state = SwipeState.DISABLE;
         deviation = 0;
         rectTransform = this.GetComponent<RectTransform> ();

@@ -26,10 +26,9 @@ namespace Controllers {
         private Swipe swipe;
         private CanvasGroup canvasGroup;
         private bool left;
+        private bool tutor;
 
         private ResourceOneStateController oneStateController;
-
-       
 
         public Sprite sme;
         public Sprite senemy;
@@ -43,14 +42,14 @@ namespace Controllers {
 
             // swipeParams.rightAvailable = false;
             // leftConditions = Services.data.GetUnavailableConditions (this.data.right.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.right.cost);
-
+            tutor = false;//Services.data.preTutorStep == 0;
             leftAvailable = true;
             rightAvailable = true;
 
-            oneStateController.changedPlayer(me);
-            oneStateController.OnUpdateCountP();
+            oneStateController.changedPlayer (me);
+            oneStateController.OnUpdateCountP ();
 
-            UpdateHUD ();
+            UpdateHUD ().Forget();
             //UpdateEffectPanel ();
 
             left = true;
@@ -60,20 +59,20 @@ namespace Controllers {
 
         public async UniTask FadeIn () {
 
-          
-            GetComponent<Swipe> ().ConstructNewSwipe ();
+            swipe.ConstructNewSwipe ();
 
-            RectTransform rectTransform = GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(0f, 130f);
-            
-            await rectTransform.DOAnchorPosY (0f, 0.5f).AsyncWaitForCompletion();
-        
+            RectTransform rectTransform = GetComponent<RectTransform> ();
+            rectTransform.anchoredPosition = new Vector2 (0f, 130f);
+
+            rectTransform.DOKill ();
+            rectTransform.DOAnchorPosY (0f, 0.5f).SetAutoKill ();
+            await UniTask.WaitUntil (() => rectTransform.anchoredPosition.y <= 0);
+
             //while (GetComponent<Animator> ().GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
             //    await UniTask.Yield ();
             //}
 
-
-            GetComponent<Swipe> ().StartSwipe ();
+            swipe.StartSwipe ();
         }
 
         /* void UpdateEffectPanel () {
@@ -105,7 +104,7 @@ namespace Controllers {
              }
          }*/
 
-        async void UpdateHUD () {
+        async UniTaskVoid UpdateHUD () {
 
             foreach (Transform g in transform.GetComponentsInChildren<Transform> ()) {
 
@@ -131,7 +130,7 @@ namespace Controllers {
                 }
             }
 
-            if (actionPanelContainer.activeSelf == true) {
+            if (actionPanelContainer.activeSelf == true || tutor == true) {
                 actionPanelContainer.SetActive (false);
             }
         }
@@ -154,17 +153,17 @@ namespace Controllers {
                 rs.Add (r);
             }
 
-            int increaseCount = me == true ? Services.player.AvailableResource(4) : Services.enemy.AvailableResource(4);
+            int increaseCount = me == true ? Services.player.AvailableResource (4) : Services.enemy.AvailableResource (4);
             foreach (RewardData r in chd.reward) {
-                RewardData _r = Utils.DeepCopyClass<RewardData>(r);
+                RewardData _r = Utils.DeepCopyClass<RewardData> (r);
 
-                if(increaseCount > 0 && _r.category == GameDataManager.ACTION_ID && _r.id == 2)
+                if (increaseCount > 0 && _r.category == GameDataManager.ACTION_ID && _r.id == 2)
                     _r.count *= 2;
 
                 rs.Add (r);
             }
 
-           // ActionSide?.Invoke (chd.cost, chd.reward);
+            // ActionSide?.Invoke (chd.cost, chd.reward);
 
             Transform trActionPanel = actionPanelItems.transform;
             int children = trActionPanel.childCount;
@@ -182,11 +181,14 @@ namespace Controllers {
         }
 
         void Start () {
-            swipe = GetComponent<Swipe> ();
-            oneStateController = transform.Find("Increase").GetComponent<ResourceOneStateController>();
 
             Swipe.OnChangeDirection += OnChangeDirection;
             //canvasGroup = actionPanel.GetComponent<CanvasGroup> ();
+        }
+
+        void Awake () {
+            swipe = GetComponent<Swipe> ();
+            oneStateController = transform.Find ("Increase").GetComponent<ResourceOneStateController> ();
         }
 
         public void OnChangeDirection (SwipeDirection direction) {
@@ -196,19 +198,13 @@ namespace Controllers {
             if (Swipe.state != SwipeState.DRAG || !gameObject.activeSelf)
                 return;
 
-
-            Debug.Log(me);
-
-            if(this.me == false)
+            if (this.me == false)
                 return;
 
             List<ConditionData> _conditions = null;
-            if(me == true)
-            {
+            if (me == true) {
                 _conditions = direction == SwipeDirection.RIGHT ? this.data.right.conditions : this.data.left.conditions;
-            }
-            else
-            {
+            } else {
                 _conditions = direction == SwipeDirection.RIGHT ? this.data.eRight.conditions : this.data.eLeft.conditions;
             }
 
@@ -233,8 +229,8 @@ namespace Controllers {
         }
 
         public void OnEndDrag () {
-            if (actionPanelContainer.activeSelf == true) {
-              //  ActionPanelTrigger?.Invoke (false);
+            if (actionPanelContainer.activeSelf == true || tutor == true) {
+                //  ActionPanelTrigger?.Invoke (false);
                 actionPanelContainer.SetActive (false);
             }
         }
@@ -245,9 +241,9 @@ namespace Controllers {
                 left = l;
                 UpdateSide ();
             }
-            if (actionPanelContainer.activeSelf == false) {
+            if (actionPanelContainer.activeSelf == false && tutor == false) {
                 actionPanelContainer.SetActive (true);
-              // ActionPanelTrigger?.Invoke (true);
+                // ActionPanelTrigger?.Invoke (true);
             }
 
         }

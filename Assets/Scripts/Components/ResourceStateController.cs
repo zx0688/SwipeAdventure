@@ -84,7 +84,11 @@ namespace Controllers {
 
             if (icon != null) {
                 Image ic = icon.GetComponent<Image> ();
-                ic.sprite = await Services.assets.GetSprite ("Resources/" + resourceId + "/icon", true);
+
+                if(resinfo.image2enemy)
+                    ic.sprite = await Services.assets.GetSprite ("Resources/" + resourceId + "/icon_" + (enemy? "enemy" : "me"), true);
+                else
+                    ic.sprite = await Services.assets.GetSprite ("Resources/" + resourceId + "/icon", true);
             }
 
             if (image != null) {

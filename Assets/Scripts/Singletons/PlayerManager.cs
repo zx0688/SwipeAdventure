@@ -178,14 +178,7 @@ namespace Managers {
             Services.player.ShowFinger?.Invoke ();
         }
 
-        public void Execute (CardData cardData, int choice, bool me, int time, PlayerManager enemy) {
-
-            ChoiceData chMeta = null;
-            if (me == true) {
-                chMeta = choice == Swipe.LEFT_CHOICE ? cardData.left : cardData.right;
-            } else {
-                chMeta = choice == Swipe.LEFT_CHOICE ? cardData.eLeft : cardData.eRight;
-            }
+        public void Execute (CardData cardData, int choice, ChoiceData chMeta, bool me, int time, PlayerManager enemy) {
 
             if (Services.data.CheckConditions (chMeta.conditions, time, false, me)) {
                 List<RewardData> result = new List<RewardData> ();

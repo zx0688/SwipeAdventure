@@ -36,12 +36,13 @@ public class GameLoop : MonoBehaviour {
 
     private GameLoopState state;
 
-    public CardItem cardItem;
+    public static CardItem cardItem;
     private CardIconQueue cardIconQueue;
 
     [SerializeField]
     private GameObject EndTurnCanvas;
 
+    private Tutorial tutorial;
     private GameObject heads;
 
     void Awake () {
@@ -62,7 +63,8 @@ public class GameLoop : MonoBehaviour {
         }
 
         heads = GameObject.Find ("Head").gameObject;
-        //queue = new List<QueueItem> ();
+        tutorial = GetComponent<Tutorial> ();
+
         state = GameLoopState.IDLE;
         EndTurnCanvas = GameObject.Find ("EndGameCanvas");
         EndTurnCanvas?.SetActive (false);
@@ -92,14 +94,19 @@ public class GameLoop : MonoBehaviour {
         cardIconQueue.CreateQueue ();
 
         heads.GetComponent<EnemyHead> ().UpdateHead (getRandomHead ());
+        Services.assets.PlaySound ("start_game").Forget ();
 
         while (true) {
+
+            await tutorial.CheckCurrentTutor ();
 
             await UniTask.WaitUntil (() => state == GameLoopState.IDLE);
 
             int currentChoise = -1;
 
             cardItem = cardIconQueue.GetFirstItem ();
+
+            tutorial.ChangeCard(cardItem);
 
             var t1 = cardIconQueue.Shift ();
             var t2 = SwipeCard ();
@@ -110,15 +117,19 @@ public class GameLoop : MonoBehaviour {
 
             int timestamp = GameTime.GetTime ();
 
-            lock (this) {
-                Services.player.Execute (cardItem.data, currentChoise, cardItem.me, timestamp, Services.enemy);
-                //Services.enemy.Execute (currentItem.card, swipe.currentChoise, true, timestamp, Services.player);
-                // Services.player.Execute (currentItem.card, choiseP, timestamp, Services.enemy);
-                // Services.enemy.Execute (currentItem.card, choiseE, timestamp, Services.player);
+            ChoiceData chMeta = null;
+            if (cardItem.me == true) {
+                chMeta = currentChoise == Swipe.LEFT_CHOICE ? cardItem.data.left : cardItem.data.right;
+            } else {
+                chMeta = currentChoise == Swipe.LEFT_CHOICE ? cardItem.data.eLeft : cardItem.data.eRight;
             }
 
-            // await cardIconQueue.Execute (currentItem, currentChoise);
+            lock (this) {
+                Services.player.Execute (cardItem.data, currentChoise, chMeta, cardItem.me, timestamp, Services.enemy);
+            }
 
+            Services.data.swipeCount++;
+            Services.assets.PlaySound ("card_move").Forget ();
             //check global state
             if (!CheckGlobalState (timestamp)) {
 
@@ -127,11 +138,20 @@ public class GameLoop : MonoBehaviour {
 
                 bool isWin = Services.data.isWin (timestamp);
 
+                if (isWin == true) {
+                    Services.assets.PlaySound ("win").Forget ();
+                } else {
+                    Services.assets.PlaySound ("lose").Forget ();
+                }
+
                 Analytics.CustomEvent ("gameOver", new Dictionary<string, object> { { "isWin", isWin } });
                 Analytics.FlushEvents ();
 
+            } else if (chMeta.reward.Exists (r => r.category == GameDataManager.ACTION_ID && r.id == 1)) {
+                Services.assets.PlaySound ("attack").Forget ();
+            } else if (chMeta.reward.Exists (r => r.category == GameDataManager.RESOURCE_ID && r.id == 1)) {
+                Services.assets.PlaySound ("heal").Forget ();
             }
-
             //await UniTask.Delay(100);
 
             //shift
@@ -147,9 +167,10 @@ public class GameLoop : MonoBehaviour {
 
     public async void StartGame () {
 
+        Services.assets.PlaySound ("tap").Forget ();
+
         Services.data.fingerStep = 0;
-        if(Services.data.isWin (0))
-        {
+        if (Services.data.isWin (0)) {
             Services.data.IncreaseTutor ();
         }
 
@@ -188,7 +209,7 @@ public class GameLoop : MonoBehaviour {
 
         // currentItem.card.anim = currentItem.card.anim != null ? currentItem.card.anim : "FadeIn_1";
 
-        int time = GameTime.GetTime ();
+        //int time = GameTime.GetTime ();
         // SwipeParams swipeParams;
         //swipeParams.leftAvailable = false;
         // Services.data.CheckConditions (currentItem.card.left.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.left.cost);
@@ -200,6 +221,8 @@ public class GameLoop : MonoBehaviour {
         cardSwipe[currentViewIndex].GetComponent<CardController> ().UpdateData (cardItem);
 
         OnNewCard?.Invoke (cardSwipe[currentViewIndex]);
+
+        // await UniTask.DelayFrame (2000);
 
         await cardSwipe[currentViewIndex].GetComponent<CardController> ().FadeIn ();
 
