@@ -65,7 +65,7 @@ public class CardIconQueue : MonoBehaviour {
 
         Clear ();
 
-        count = Services.data.tutorStep == 0 ? 2 : cardIcons.Count;
+        count = cardIcons.Count;//Services.data.tutorStep == 0 ? 2 : cardIcons.Count;
 
         for (int i = 0; i < count; i++) {
             CardItem q = Services.data.GetNewCard (default (CardData), me, 0);

@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 2805512823798960293}
   - component: {fileID: 9110967144346803493}
   - component: {fileID: 592679790019421178}
+  - component: {fileID: 4006292191518389598}
   m_Layer: 0
   m_Name: ResourceSlider0
   m_TagString: Untagged
@@ -189,6 +190,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resourceId: 0
   enemy: 0
+--- !u!225 &4006292191518389598
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1886476114328661897}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6753490003348531684
 GameObject:
   m_ObjectHideFlags: 0

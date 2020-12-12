@@ -17,10 +17,11 @@ namespace Controllers {
         private Animator animator;
 
         public async UniTask FadeOut () {
-
-            animator.SetTrigger ("fadeout");
-            while (animator.GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
-                await UniTask.Yield ();
+            if (gameObject.activeInHierarchy) {
+                animator.SetTrigger ("fadeout");
+                while (animator.GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
+                    await UniTask.Yield ();
+                }
             }
         }
 
@@ -59,6 +60,7 @@ namespace Controllers {
         }
 
         void Start () {
+
             animator = transform.Find ("Container").gameObject.GetComponent<Animator> ();
 
         }

@@ -11,8 +11,8 @@ namespace Controllers {
     public class CardController : MonoBehaviour, IUpdateData<CardItem> {
         // Start is called before the first frame update
 
-        // [SerializeField]
-        // public GameObject actionText;
+        [SerializeField]
+        public GameObject text;
         public static event Action<ConditionData> OnUnavailableCondition;
 
         [SerializeField]
@@ -42,14 +42,14 @@ namespace Controllers {
 
             // swipeParams.rightAvailable = false;
             // leftConditions = Services.data.GetUnavailableConditions (this.data.right.conditions, time) && Services.data.CheckAvailableCost (currentItem.card.right.cost);
-            tutor = false;//Services.data.preTutorStep == 0;
+            tutor = false; //Services.data.preTutorStep == 0;
             leftAvailable = true;
             rightAvailable = true;
 
             oneStateController.changedPlayer (me);
             oneStateController.OnUpdateCountP ();
 
-            UpdateHUD ().Forget();
+            UpdateHUD ().Forget ();
             //UpdateEffectPanel ();
 
             left = true;
@@ -57,22 +57,27 @@ namespace Controllers {
 
         }
 
-        public async UniTask FadeIn () {
+        public async UniTask<int> FadeIn () {
 
             swipe.ConstructNewSwipe ();
 
             RectTransform rectTransform = GetComponent<RectTransform> ();
             rectTransform.anchoredPosition = new Vector2 (0f, 130f);
 
-            rectTransform.DOKill ();
-            rectTransform.DOAnchorPosY (0f, 0.5f).SetAutoKill ();
-            await UniTask.WaitUntil (() => rectTransform.anchoredPosition.y <= 0);
+            if (text.activeSelf) {
+                text.GetComponent<CanvasGroup> ().alpha = 0;
+                text.GetComponent<CanvasGroup> ().DOFade (1f, 0.5f).SetAutoKill (false);
+            }
 
+            rectTransform.DOKill ();
+            await rectTransform.DOAnchorPosY (0f, 0.5f).AsyncWaitForCompletion ();
+            rectTransform.DOKill ();
             //while (GetComponent<Animator> ().GetCurrentAnimatorStateInfo (0).IsName ("Idle")) {
             //    await UniTask.Yield ();
             //}
 
             swipe.StartSwipe ();
+            return 1;
         }
 
         /* void UpdateEffectPanel () {
@@ -148,17 +153,31 @@ namespace Controllers {
 
             //Text at = actionText.GetComponent<Text> ();
             //at.text = chd.text;
+            List<RewardData> result = new List<RewardData> ();
+            List<RewardData> cost = new List<RewardData> (chd.cost);
 
-            foreach (RewardData r in chd.cost) {
+            if (me == true)
+                result = new List<RewardData> (chd.reward);
+            else {
+                Services.data.GetResourceReward (result, chd.reward, new List<RewardData> (), 0, false, false, me);
+            }
+
+            foreach (RewardData r in cost) {
                 rs.Add (r);
             }
 
             int increaseCount = me == true ? Services.player.AvailableResource (4) : Services.enemy.AvailableResource (4);
-            foreach (RewardData r in chd.reward) {
+            foreach (RewardData r in result) {
+
                 RewardData _r = Utils.DeepCopyClass<RewardData> (r);
 
                 if (increaseCount > 0 && _r.category == GameDataManager.ACTION_ID && _r.id == 2)
                     _r.count *= 2;
+
+                if (r.count < 0) {
+                    r.count = Math.Abs (r.count);
+                    cost.Add (r);
+                }
 
                 rs.Add (r);
             }
@@ -171,7 +190,7 @@ namespace Controllers {
                 Transform t = trActionPanel.GetChild (i);
                 GameObject g = t.gameObject;
                 if (i < rs.Count) {
-                    bool add = chd.reward.Contains (rs[i]);
+                    bool add = !cost.Contains (rs[i]);
                     g.GetComponent<ResourceActionController> ().UpdateDataSign (rs[i], add);
                     g.SetActive (true);
                 } else {
@@ -198,8 +217,8 @@ namespace Controllers {
             if (Swipe.state != SwipeState.DRAG || !gameObject.activeSelf)
                 return;
 
-            if (this.me == false)
-                return;
+            //if (this.me == false)
+            //    return;
 
             List<ConditionData> _conditions = null;
             if (me == true) {

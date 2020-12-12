@@ -109,6 +109,7 @@ namespace Managers {
                 r.count = 0;
                 r.id = item.id;
                 r.enemy = enemy;
+                r.conditions = new List<ConditionData>();
                 r.category = item.category;
                 list.Add (r);
             }
@@ -286,7 +287,7 @@ namespace Managers {
             }
 
             game.cards = game.cards.Where (c => c.off != true).ToList ();
-            Debug.Log ("");
+            
         }
 
         // Update is called once per frame

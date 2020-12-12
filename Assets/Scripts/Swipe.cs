@@ -45,6 +45,8 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
     [HideInInspector]
     public static event Action OnStartSwipe;
     [HideInInspector]
+    public static event Action OnFirstSwipeCard;
+    [HideInInspector]
     public static event Action OnEndSwipe;
     [HideInInspector]
     public static event Action OnDrop;
@@ -62,6 +64,7 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
     public static SwipeState state { get; private set; }
 
     private RectTransform rectTransform;
+    private bool firstTakeCard;
 
     void Awake () {
         currentChoise = -1;
@@ -75,8 +78,6 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
     public void ConstructNewSwipe () {
         deviation = 0;
 
-        direction = 0;
-
         vector = Vector2.zero;
         currentChoise = -1;
         StopAllCoroutines ();
@@ -88,9 +89,8 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
     }
     public void StartSwipe () {
         state = SwipeState.IDLE;
-       // GetComponent<Animator> ().enabled = false;
-
- 
+        // GetComponent<Animator> ().enabled = false;
+        firstTakeCard = false;
 
         OnStartSwipe?.Invoke ();
     }
@@ -178,6 +178,12 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
         }
 
         direction = 0;
+
+        if (firstTakeCard == false) {
+            firstTakeCard = true;
+            OnFirstSwipeCard?.Invoke ();
+        }
+
         state = SwipeState.DRAG;
     }
 
@@ -286,7 +292,7 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
 
         Vector2 v = (rectTransform.anchoredPosition - pivotPoint);
         v.Normalize ();
-        v *= 15f;//fMovingSpeed;
+        v *= 15f; //fMovingSpeed;
 
         while (CheckOnCamera ()) {
 
@@ -294,7 +300,7 @@ public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
             yield return null;
         }
         rectTransform.anchoredPosition += 6 * v;
-        gameObject.SetActive(false);
+        gameObject.SetActive (false);
     }
 
 }

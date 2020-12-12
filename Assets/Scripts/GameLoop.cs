@@ -78,6 +78,10 @@ public class GameLoop : MonoBehaviour {
 
     public async UniTask SwipeCard () {
         await OpenNewCard ();
+
+        if(Services.data.tutorStep == 0)
+            await tutorial.PostCardAnimation();
+
         Swipe swipe = cardSwipe[currentViewIndex].GetComponent<Swipe> ();
         await UniTask.WaitUntil (() => swipe.currentChoise != -1);
     }
@@ -107,7 +111,7 @@ public class GameLoop : MonoBehaviour {
             cardItem = cardIconQueue.GetFirstItem ();
 
             tutorial.ChangeCard(cardItem);
-
+           
             var t1 = cardIconQueue.Shift ();
             var t2 = SwipeCard ();
             await UniTask.WhenAll (t1, t2);
