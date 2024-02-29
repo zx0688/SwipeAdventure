@@ -1,57 +1,67 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Controllers;
-using Managers;
+
 using UnityEngine;
+using UnityEngine.UI;
 
-public static class Utils {
 
-    /*public static void DeepCopy<T> (T copyFrom, T copyTo) {
-        if (copyFrom == null || copyTo == null)
-            throw new Exception ("Must not specify null parameters");
+public static class Utils
+{
 
-        bool copyChildren = true;
-        var properties = copyFrom.GetType ().GetProperties ();
-
-        foreach (var p in properties.Where (prop => prop.CanRead && prop.CanWrite)) {
-            if (p.PropertyType.IsClass && p.PropertyType != typeof (string)) {
-                if (!copyChildren) continue;
-
-                var destinationClass = Activator.CreateInstance (p.PropertyType);
-                object copyValue = p.GetValue (copyFrom);
-
-                DeepCopy (copyValue, destinationClass);
-
-                p.SetValue (copyTo, destinationClass);
-            } else {
-                object copyValue = p.GetValue (copyFrom);
-                p.SetValue (copyTo, copyValue);
+    public static void ClearArray<T>(ref T[] arr)
+    {
+        int count = 0;
+        for (int a = 0; a < arr.Length; a++)
+        {
+            if (arr[a] == null)
+                count++;
+        }
+        T[] n = new T[arr.Length - count];
+        count = 0;
+        for (int a = 0; a < arr.Length; a++)
+        {
+            if (arr[a] != null)
+            {
+                n[count] = arr[a];
+                count++;
             }
         }
-    }*/
-    public static List<T> DeepCopyList<T> (List<T> origin) where T : class, new () {
-        List<T> copy = new List<T>();
-        origin.ForEach(r => copy.Add(DeepCopyClass(r)));
-        return copy;
+        arr = n;
     }
-    public static T DeepCopyClass<T> (T origin) where T : class, new () {
-        T copyTo = JsonUtility.FromJson<T> (JsonUtility.ToJson (origin));
-        return copyTo;
+
+    public static void SetAlpha(Image image, float a)
+    {
+        Color c = image.color;
+        c.a = a;
+        image.color = c;
     }
-    /*public static T DeepCopy<T> (T origin) where T : class, new () {
-        T copy = JsonUtility.FromJson<T> (JsonUtility.ToJson (origin));
-        return copy;
-    }*/
-    public static bool Intersection<T> (T[] array1, T[] array2) {
+    public static void RemoveAt<T>(ref T[] arr, int index)
+    {
+        if (arr.Length == 0 || index == -1)
+            return;
+
+        for (int a = index; a < arr.Length - 1; a++)
+        {
+            arr[a] = arr[a + 1];
+        }
+        Array.Resize(ref arr, arr.Length - 1);
+    }
+    public static bool Intersection<T>(T[] array1, T[] array2)
+    {
+
+        if (array1 == null || array2 == null)
+            return false;
+
         foreach (T e1 in array1)
-            foreach (T e2 in array2)
-                if (e1.Equals (e2))
-                    return true;
+        {
+            if (Array.IndexOf<T>(array2, e1) != -1)
+                return true;
+        }
         return false;
     }
-    public static bool Contains<T> (T[] array1, T element) {
-        return Array.IndexOf (array1, element) != -1;
+    public static bool Contains<T>(T[] array1, T element)
+    {
+        return Array.IndexOf(array1, element) != -1;
     }
 }
